@@ -1,0 +1,15 @@
+{
+  "python": "3.11.14 (main, Jan 14 2026, 21:09:41) [Clang 21.1.4 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "module_path": "/private/var/folders/zj/3lkct8n50tj6rr_njk46s40c0000gn/T/sqd-bundle-check-tgjwe4jp/bundle/sqd_workflow/ibm_steps.py",
+  "versions": {
+    "qiskit": "2.5.2",
+    "qiskit-addon-sqd": "0.13.1",
+    "ffsim": "0.0.84",
+    "pyscf": "2.14.0",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "threadpoolctl": "3.7.0",
+    "pytest": "8.4.2"
+  }
+}

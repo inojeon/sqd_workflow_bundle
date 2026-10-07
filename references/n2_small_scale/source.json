@@ -1,0 +1,19 @@
+{
+  "revision": "64fbdc210b4379f9079e3d8f8e2ee8877cbc3ba2",
+  "url": "https://github.com/Qiskit/documentation/blob/64fbdc210b4379f9079e3d8f8e2ee8877cbc3ba2/docs/tutorials/sample-based-quantum-diagonalization.ipynb",
+  "retrieved": "2026-10-07",
+  "cells": [
+    4,
+    7,
+    9,
+    11,
+    13,
+    15,
+    16,
+    18,
+    20,
+    22
+  ],
+  "sha256": "2f3b207f453eb41e6b5e64f1389c86685aa113f1567f370110c6de7653331f19",
+  "license": "Apache-2.0 (code snippets; repository README Licensing)"
+}

@@ -1,0 +1,41 @@
+/private/var/folders/zj/3lkct8n50tj6rr_njk46s40c0000gn/T/sqd-bundle-check-tgjwe4jp/bundle/.venv/lib/python3.11/site-packages/pyscf/lib/misc.py:203: UserWarning: OpenMP is not available. Setting omp_threads to 1 has no effects.
+  warnings.warn('OpenMP is not available. '
+[IBM STEP 1/4] Map classical inputs to a quantum problem
+converged SCF energy = -108.464957764796
+CASCI E = -108.595987350986  E(CI) = -32.4115475088426  S^2 = 0.0000000
+norb = 8
+nelec = (5, 5)
+E(CCSD) = -108.5933309085008  E_corr = -0.1283731437052354
+[IBM STEP 2/4] Optimize for quantum hardware execution
+Gate counts: OrderedDict([('xx_plus_yy', 254), ('cp', 88), ('p', 64), ('measure', 16), ('x', 10), ('barrier', 1)])
+[IBM STEP 3/4] Execute using Qiskit primitives
+[IBM STEP 4/4] Post-process and return result in desired classical format
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.0478515625
+Iteration 1
+	Subsample 0
+		Energy: -108.59592168608235
+		Subspace dimension: 2500
+	Subsample 1
+		Energy: -108.59505692674026
+		Subspace dimension: 2500
+	Subsample 2
+		Energy: -108.59593164616311
+		Subspace dimension: 2500
+Iteration 2
+	Subsample 0
+		Energy: -108.59593164616311
+		Subspace dimension: 2500
+	Subsample 1
+		Energy: -108.59593164616311
+		Subspace dimension: 2500
+	Subsample 2
+		Energy: -108.59593164616311
+		Subspace dimension: 2500
+Final energy: -108.59593164616311
+Final energy error: 5.5704822926827546e-05
+SQD 반복 횟수: 2
+Alpha 궤도 점유수: [0.99652715 0.99337219 0.97514812 0.97516864 0.99469328 0.029033
+ 0.02901678 0.00704084]
+Beta  궤도 점유수: [0.99652715 0.99337219 0.97514812 0.97516864 0.99469328 0.029033
+ 0.02901678 0.00704084]

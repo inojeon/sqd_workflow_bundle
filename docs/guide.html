@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQD 워크플로우 실행 가이드 — run_steps.py</title><style>:root { color-scheme:light; --ink:#193346; --muted:#4c6477; --line:#d5e0e8; --accent:#006b70; }
+* { box-sizing:border-box; }
+body { margin:0; color:var(--ink); background:#f1f5f8; font:16px/1.85 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+header { padding:30px max(24px,calc((100vw - 1080px)/2)); background:#15394a; color:#fff; }
+header span { font-size:13px; letter-spacing:.13em; font-weight:700; }
+nav { display:flex; flex-wrap:wrap; gap:8px 24px; margin-top:12px; }
+header a { color:#dceff1; font-size:14px; }
+a { color:#075d9a; text-underline-offset:3px; overflow-wrap:anywhere; }
+a:focus-visible { outline:3px solid #b36b00; outline-offset:4px; }
+main { max-width:1144px; margin:auto; background:#fff; padding:42px 44px 64px; }
+h1 { font-size:clamp(28px,4vw,42px); line-height:1.35; letter-spacing:-.03em; margin:0 0 24px; }
+h2 { font-size:26px; line-height:1.5; border-top:1px solid var(--line); padding-top:30px; margin-top:44px; scroll-margin-top:20px; }
+h3 { font-size:20px; margin-top:30px; }
+p { margin:14px 0; }
+blockquote { margin:24px 0; padding:14px 24px; border-left:4px solid var(--accent); background:#eaf5f3; }
+blockquote p { margin:0; }
+.toc { background:#f3f7fa; border:1px solid var(--line); border-radius:12px; padding:22px 28px; margin:28px 0; }
+.toctitle { font-weight:700; }
+.toc ul { padding-left:22px; }
+.toc > ul > li > ul { display:none; }
+li { margin:8px 0; }
+.table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; margin:20px 0; }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th,td { border-bottom:1px solid var(--line); text-align:left; vertical-align:top; padding:13px 15px; min-width:120px; }
+th { background:#eaf1f5; }
+tr:last-child td { border-bottom:0; }
+code { background:#edf2f5; padding:2px 5px; border-radius:4px; font-size:.9em; overflow-wrap:anywhere; }
+pre { background:#142d3c; color:#e6f1f6; border-radius:9px; padding:22px; overflow-x:auto; line-height:1.65; tab-size:4; }
+pre code { background:none; color:inherit; padding:0; font-size:13px; overflow-wrap:normal; }
+footer { max-width:1144px; margin:auto; padding:24px; color:var(--muted); font-size:14px; }
+@media(max-width:700px) { header { padding:24px 20px; } main { padding:28px 18px; } h2 { font-size:22px; } .toc { padding:18px; } pre { padding:16px; } }
+@media print { body { background:white; font-size:10pt; } header { background:white; color:var(--ink); padding:0 0 16px; } nav { display:none; } main { padding:0; max-width:none; } h1 { font-size:24pt; } h2 { font-size:16pt; break-after:avoid; margin-top:24px; } h3 { break-after:avoid; } .table-wrap { overflow:visible; } table { font-size:9pt; } th,td { min-width:0; padding:8px; } tr,blockquote { break-inside:avoid; } pre { background:#f0f3f5; color:#152f40; white-space:pre-wrap; overflow-wrap:anywhere; } pre code { font-size:8pt; } a { color:inherit; } footer { padding:16px 0; } @page { size:A4; margin:17mm; } }
+</style></head>
+<body><header><span>IBM SQD · WORKFLOW HANDOFF</span>
+<nav aria-label="문서 바로가기"><a href="../README.md">빠른 시작</a>
+<a href="guide.md">Markdown 원본</a><a href="../validation/README.md">검증 기록</a>
+<a href="#source-code">실행 코드 전체</a></nav></header>
+<main><h1 id="run_stepspy-sqd">run_steps.py로 이해하는 SQD 워크플로우</h1>
+<p>IBM small-scale simulator 예제의 계산을 네 단계로 실행하고, 이후 워크플로우 SDK에 연결하기 위한 개발자·연구자 가이드입니다. 정리일: 2026-10-07.</p>
+<blockquote>
+<p>이 폴더는 <strong>SDK 연결 직전의 독립 실행 패키지</strong>입니다. 실행 코드는 기존 계산을 그대로 복사했으며, 파일 배치·설치 설정·검증·설명 문서를 함께 제공합니다.</p>
+</blockquote>
+<div class="toc"><span class="toctitle">이 문서의 내용</span><ul>
+<li><a href="#1">1. 무엇을 실행하는가</a></li>
+<li><a href="#2">2. 설치와 첫 실행</a></li>
+<li><a href="#3">3. 파일을 읽는 순서</a></li>
+<li><a href="#4">4. 네 단계와 의존 관계</a><ul>
+<li><a href="#step-1">STEP 1 — 분자 문제와 회로 구성</a></li>
+<li><a href="#step-2">STEP 2 — 회로 최적화</a></li>
+<li><a href="#step-3">STEP 3 — 측정 샘플 획득</a></li>
+<li><a href="#step-4-sqd">STEP 4 — SQD 반복과 결과 해석</a></li>
+</ul>
+</li>
+<li><a href="#5">5. 단계 사이의 데이터 계약</a></li>
+<li><a href="#6-sdkslurm">6. SDK·Slurm 워크플로우로 옮기는 방법</a></li>
+<li><a href="#7">7. 원본과 같은 계산인지 확인</a></li>
+<li><a href="#8">8. 변경할 설정과 흔한 문제</a></li>
+<li><a href="#9">9. 레퍼런스와 출처</a></li>
+<li><a href="#10">10. 문서와 전달본 관리</a></li>
+</ul>
+</div>
+<h2 id="1">1. 무엇을 실행하는가</h2>
+<p>질소 분자 N₂의 바닥상태 에너지를 SQD(sample-based quantum diagonalization)로 추정합니다. 양자 회로에서 전자 배치를 샘플링하고, 고전 컴퓨터에서 선택된 부분공간의 Hamiltonian을 대각화합니다. 본 실행에서는 QPU 대신 Qiskit의 이상적인 <code>StatevectorSampler</code>를 사용합니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>기본 설정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>분자·기저</td>
+<td>N₂, N–N 거리 1.0 Å, STO-6G</td>
+</tr>
+<tr>
+<td>활성 공간</td>
+<td>공간 궤도 8개, 전자 10개: α=5, β=5</td>
+</tr>
+<tr>
+<td>큐비트</td>
+<td>16개: 공간 궤도당 스핀 궤도 2개</td>
+</tr>
+<tr>
+<td>회로</td>
+<td>Hartree–Fock 상태 + LUCJ, 반복 4회</td>
+</tr>
+<tr>
+<td>샘플링</td>
+<td>StatevectorSampler, 100,000 shots, seed=12345</td>
+</tr>
+<tr>
+<td>SQD</td>
+<td>배치 3개, 배치당 샘플 1,000개, <code>max_dim=50</code></td>
+</tr>
+<tr>
+<td>수렴 조건</td>
+<td>에너지·점유수 허용오차 각각 1e-3, 최대 SQD 반복 5회</td>
+</tr>
+<tr>
+<td>대각화</td>
+<td><code>solve_sci_batch</code>, <code>spin_sq=0.0</code>, <code>max_cycle=200</code></td>
+</tr>
+<tr>
+<td>비교값</td>
+<td>STEP 1에서 계산한 활성 공간 FCI 총에너지</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>GenericBackendV2</code>는 회로 변환의 대상 연결 구조와 게이트 집합을 제공합니다. 이것을 사용했다고 실제 QPU나 잡음 모델에서 실행한 것은 아닙니다. 현재 샘플링은 이상적인 상태벡터 계산입니다.</p>
+<h2 id="2">2. 설치와 첫 실행</h2>
+<p>폴더 전체를 원하는 위치에 복사합니다. 이후 아래 명령은 <code>run_steps.py</code>와 <code>pyproject.toml</code>이 있는 폴더에서 실행합니다.</p>
+<pre><code class="language-bash">cd sqd_workflow_bundle
+uv sync --locked --extra test
+uv run --locked python run_steps.py
+</code></pre>
+<p>Python 3.11을 사용합니다. 최초 의존성 설치에는 네트워크가 필요하지만 실행에는 IBM 계정·API 키가 필요하지 않습니다. <a href="https://docs.astral.sh/uv/getting-started/installation/">uv 설치 안내</a>를 참고하세요. pip 설치 명령은 <a href="../README.md">README</a>에 있습니다.</p>
+<p>화면에는 분자 계산 결과, 단계 이름, 회로 게이트 수, 샘플 유효 비율, 반복별 배치 에너지, 최종 에너지와 점유수가 출력됩니다. 로그를 보관하려면 다음처럼 실행합니다.</p>
+<pre><code class="language-bash">mkdir -p runs
+uv run --locked python run_steps.py &gt; runs/execution.log 2&gt;&amp;1
+</code></pre>
+<p>드라이버는 결과 파일을 자동 생성하지 않습니다. 마지막 결과는 <code>main()</code>의 반환값으로 받을 수 있습니다.</p>
+<pre><code class="language-python">from run_steps import main
+
+result = main()
+print(result.final_energy)
+print(result.energy_error)
+print(len(result.result_history))
+</code></pre>
+<h2 id="3">3. 파일을 읽는 순서</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>파일</th>
+<th>역할</th>
+<th>읽는 시점</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../run_steps.py">run_steps.py</a></td>
+<td>네 함수의 호출 순서와 데이터 연결</td>
+<td>가장 먼저</td>
+</tr>
+<tr>
+<td><a href="../sqd_workflow/ibm_steps.py">sqd_workflow/ibm_steps.py</a></td>
+<td>계산 본문·반환 자료형</td>
+<td>단계별 상세를 볼 때</td>
+</tr>
+<tr>
+<td><a href="../pyproject.toml">pyproject.toml</a> / <a href="../uv.lock">uv.lock</a></td>
+<td>직접·전이 의존성</td>
+<td>환경을 재현할 때</td>
+</tr>
+<tr>
+<td><a href="../references/n2_small_scale/original.py">원본 코드</a></td>
+<td>IBM 예제 코드 셀 보존본</td>
+<td>과학 코드 출처를 비교할 때</td>
+</tr>
+<tr>
+<td><a href="../references/n2_small_scale/run_reference.py">독립 원본 실행기</a></td>
+<td>원본 실행·중간 데이터 저장</td>
+<td>재현 검증할 때</td>
+</tr>
+<tr>
+<td><a href="../tests/test_ibm_steps.py">비교 테스트</a></td>
+<td>적분·샘플·에너지·점유수·이력 비교</td>
+<td>변경 후 검증할 때</td>
+</tr>
+<tr>
+<td><a href="../COPY_MANIFEST.json">COPY_MANIFEST.json</a></td>
+<td>원 프로젝트 복사 출처와 해시</td>
+<td>전달 이력을 확인할 때</td>
+</tr>
+<tr>
+<td><a href="../NOTICE.md">NOTICE</a></td>
+<td>IBM 라이선스와 수정 내역</td>
+<td>재배포할 때</td>
+</tr>
+</tbody>
+</table></div>
+<p>원 프로젝트의 다른 계산 경로인 <code>prepare/sample/postprocess/solve</code>, CLI, MPI 코드는 이 폴더의 실행 의존성이 아닙니다. 이 패키지에는 <code>run_steps.py</code>가 실제 사용하는 코드만 담았습니다.</p>
+<h2 id="4">4. 네 단계와 의존 관계</h2>
+<pre><code class="language-text">STEP 1: step1_map()
+    │ mapped: 분자 정보 + 적분 + 회로 + pass manager + FCI 기준값
+    ├──────────────────────────────────────────┐
+    ▼                                          │
+STEP 2: step2_optimize(mapped)                  │
+    │ isa_circuit: 최적화된 측정 회로           │
+    ▼                                          │
+STEP 3: step3_execute(isa_circuit)              │
+    │ executed: 측정 결과 + 난수 상태           │
+    ▼                                          ▼
+STEP 4: step4_postprocess(mapped, executed)
+    └─ 유효 비율 확인 → 구성 복구·부분공간 대각화 반복 → 총에너지
+</code></pre>
+<p>STEP 4에는 STEP 3의 샘플 외에 <strong>STEP 1의 적분과 분자 정보가 직접 필요</strong>합니다. 단순히 마지막 작업의 출력만 다음 작업으로 넘기는 선형 체인으로 구현하면 이 의존성을 놓치게 됩니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>IBM 공식 단계 이름</th>
+<th>함수</th>
+<th>입력 → 출력</th>
+<th>기본 실행 자원</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STEP 1: Map classical inputs to a quantum problem</td>
+<td><code>step1_map()</code></td>
+<td>기본 분자 설정 → <code>MappedProblem</code></td>
+<td>로컬 CPU</td>
+</tr>
+<tr>
+<td>STEP 2: Optimize for quantum hardware execution</td>
+<td><code>step2_optimize(mapped)</code></td>
+<td><code>MappedProblem</code> → <code>QuantumCircuit</code></td>
+<td>로컬 CPU</td>
+</tr>
+<tr>
+<td>STEP 3: Execute using Qiskit primitives</td>
+<td><code>step3_execute(isa_circuit)</code></td>
+<td>회로 → <code>ExecutedCircuit</code></td>
+<td>로컬 상태벡터 시뮬레이션</td>
+</tr>
+<tr>
+<td>STEP 4: Post-process and return result in desired classical format</td>
+<td><code>step4_postprocess(mapped, executed)</code></td>
+<td>분자·측정 결과 → <code>PostprocessedResult</code></td>
+<td>로컬 CPU</td>
+</tr>
+</tbody>
+</table></div>
+<p>이 단계는 IBM의 알고리즘 설명 기준입니다. 각 단계를 Slurm CPU 노드 하나, QPU, MPI 노드 여러 개와 일대일로 고정한 자원 분할은 아닙니다.</p>
+<h3 id="step-1">STEP 1 — 분자 문제와 회로 구성</h3>
+<p>PySCF로 RHF 계산을 수행하고 활성 공간 적분을 구합니다. 작은 문제의 정확한 비교값을 얻기 위해 CASCI/FCI를 실행합니다. CCSD의 t1·t2 진폭으로 LUCJ 회로를 초기화하고, Hartree–Fock 준비 회로와 측정을 붙입니다.</p>
+<p>원본처럼 이 단계에서 LUCJ 전용 pass manager도 만듭니다. <strong>pass manager 적용은 STEP 2에서 수행</strong>하므로 STEP 1의 회로에는 추상적인 ffsim 연산이 남아 있습니다.</p>
+<p><code>compilation_seed=12345</code>가 기본값입니다. <code>step1_map(compilation_seed=None)</code>은 원문처럼 backend/transpiler seed를 고정하지 않는 동작이며, 이때 샘플 단위 동일성을 기대하면 안 됩니다.</p>
+<h3 id="step-2">STEP 2 — 회로 최적화</h3>
+<p><code>mapped.pass_manager.run(mapped.circuit)</code>로 회로를 변환합니다. 반환값은 <code>isa_circuit</code>이며 게이트 수를 출력합니다. 실제 QPU로 바꾸려면 장치의 target과 연결 구조에 맞는 최적화·매핑을 별도로 검증해야 합니다.</p>
+<h3 id="step-3">STEP 3 — 측정 샘플 획득</h3>
+<p>NumPy 난수 생성기를 seed=12345로 만들고 <code>StatevectorSampler</code>로 100,000회 측정합니다. <code>pub_result.data.meas</code>에는 측정 비트 배열이 있습니다. 샘플링 직후의 난수 상태도 복사해 반환합니다.</p>
+<p>이는 IBM 원본에서 sampling과 SQD에 동일한 난수 생성기를 이어 쓰는 동작을 단계 분리 후에도 재현하기 위한 장치입니다. STEP 4에서 seed=12345로 새로 시작하는 것과는 다릅니다.</p>
+<h3 id="step-4-sqd">STEP 4 — SQD 반복과 결과 해석</h3>
+<p>먼저 전자 수를 만족하는 샘플의 비율을 출력합니다. 이 과정은 통계 계산이며, 잘못된 전자 수를 가진 샘플을 모두 삭제해 넘기는 전처리가 아닙니다. 원본 측정 배열을 <code>diagonalize_fermionic_hamiltonian</code>에 넘겨 configuration recovery와 대각화 반복을 수행합니다.</p>
+<p><code>callback</code>은 각 SQD 반복의 배치별 에너지·상태를 <code>result_history</code>에 보관합니다. SQD 반복 안에 배치별 고유값 솔버 반복이 있으므로 <code>max_iterations</code>와 <code>max_cycle</code>은 서로 다른 제한입니다. 여기서 반복한다고 STEP 3의 회로를 다시 실행하는 것은 아닙니다.</p>
+<p>최종 총에너지는 <code>result.energy + mapped.nuclear_repulsion_energy</code>입니다. 이 변수 이름은 원본을 따르지만 <code>CASCI.get_h1cas()</code>가 반환한 상수항이므로 <strong>핵 반발뿐 아니라 동결된 코어의 기여도 포함할 수 있습니다.</strong> SDK 어댑터에서 이 상수를 두 번 더하지 않도록 해야 합니다.</p>
+<h2 id="5">5. 단계 사이의 데이터 계약</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>객체·필드</th>
+<th>의미</th>
+<th>후속 사용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MappedProblem.norb</code>, <code>.nelec</code></td>
+<td>활성 공간 궤도 수와 스핀별 전자 수</td>
+<td>STEP 4의 배치·전자 수 제약</td>
+</tr>
+<tr>
+<td><code>.hcore</code>, <code>.eri</code></td>
+<td>1전자·2전자 적분, NumPy 배열</td>
+<td>부분공간 Hamiltonian</td>
+</tr>
+<tr>
+<td><code>.nuclear_repulsion_energy</code>, <code>.reference_energy</code></td>
+<td>에너지 상수와 FCI 총에너지</td>
+<td>총에너지·오차 계산</td>
+</tr>
+<tr>
+<td><code>.circuit</code>, <code>.pass_manager</code></td>
+<td>추상 회로와 LUCJ 변환 도구</td>
+<td>STEP 2</td>
+</tr>
+<tr>
+<td><code>ExecutedCircuit.pub_result</code></td>
+<td>Qiskit primitive 측정 결과</td>
+<td><code>.data.meas</code>를 SQD에 전달</td>
+</tr>
+<tr>
+<td><code>.rng_state</code></td>
+<td>샘플링 직후 NumPy RNG 상태의 사본</td>
+<td>STEP 4의 난수 진행 재현</td>
+</tr>
+<tr>
+<td><code>PostprocessedResult.result</code></td>
+<td><code>SCIResult</code>: 전자 에너지·상태·점유수</td>
+<td>과학 결과 분석</td>
+</tr>
+<tr>
+<td><code>.result_history</code></td>
+<td>반복마다 배치 결과 목록</td>
+<td>수렴·배치 비교</td>
+</tr>
+<tr>
+<td><code>.final_energy</code>, <code>.energy_error</code></td>
+<td>상수 포함 총에너지, FCI 대비 차이</td>
+<td>결과 보고</td>
+</tr>
+<tr>
+<td><code>.valid_fraction</code>, <code>.expected_fraction_random</code></td>
+<td>실제·균등 무작위 샘플의 유효 비율</td>
+<td>측정 통계</td>
+</tr>
+</tbody>
+</table></div>
+<p>세 자료형은 <strong>메모리 내 Python 객체 계약</strong>입니다. JSON으로 그대로 직렬화할 수 있는 형식이 아니며 pass manager, QuantumCircuit, PubResult, SCIResult에는 별도의 변환이 필요합니다.</p>
+<h2 id="6-sdkslurm">6. SDK·Slurm 워크플로우로 옮기는 방법</h2>
+<p>현재 드라이버의 실제 호출 관계는 다음과 같습니다.</p>
+<pre><code class="language-python">mapped = step1_map()
+isa_circuit = step2_optimize(mapped)
+executed = step3_execute(isa_circuit)
+result = step4_postprocess(mapped, executed)
+</code></pre>
+<p>향후 SDK에서는 각 함수를 task로 감싸고 위 입력 의존성을 선언합니다. CPU 작업·시뮬레이터·QPU·MPI 배치는 미들웨어의 실행 어댑터가 결정합니다. 다음은 <strong>추가 구현 사항</strong>입니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>연결 지점</th>
+<th>추가 구현과 검증</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>서로 다른 프로세스/노드</td>
+<td>적분은 NPZ 등, 메타데이터·RNG는 JSON, 최적화 회로는 QPY 등으로 저장하고 schema/version을 정의</td>
+</tr>
+<tr>
+<td>STEP 1 → STEP 2</td>
+<td>추상 ffsim 회로의 직렬화 가능 여부 확인. pass manager는 설정으로 재구성하는 방식을 검토</td>
+</tr>
+<tr>
+<td>STEP 3 → STEP 4</td>
+<td>샘플 수, 측정 레지스터명, 스핀 순서, qubit/clbit/layout 매핑을 보존. 필요하면 BitArray로 재구성하는 어댑터 작성</td>
+</tr>
+<tr>
+<td>실제 QPU 제출</td>
+<td>인증·job ID·재시도·결과 수집 및 실제 장치용 transpilation 구현</td>
+</tr>
+<tr>
+<td>Slurm</td>
+<td>작업별 자원 선언, 실패 전파, 출력 경로, 재시작·캐시 규칙 구현</td>
+</tr>
+<tr>
+<td>MPI/GPU SQD</td>
+<td><code>sci_solver</code> 연결점 검토. 배치 분산과 한 배치 내부의 분산 대각화를 구별하고 에너지 동등성 검증</td>
+</tr>
+</tbody>
+</table></div>
+<p>Python 객체에 대한 무조건적인 pickle 전송이나 <code>mpirun python run_steps.py</code>만으로 분산 워크플로우가 완성되는 것은 아닙니다. 후자는 MPI 통신 로직이 없으므로 동일 계산을 여러 번 독립 실행하게 됩니다.</p>
+<p>IBM의 STEP 1~4 구분을 유지한 채 실행 자원을 붙일 수 있습니다. 특히 STEP 4의 SQD 반복과 configuration recovery를 서로 다른 작업으로 더 쪼개려면 반복 상태·장애 복구·동기화 계약을 추가해야 합니다.</p>
+<h2 id="7">7. 원본과 같은 계산인지 확인</h2>
+<pre><code class="language-bash">uv run --locked --extra test python -m pytest -q
+</code></pre>
+<p>테스트는 별도 프로세스에서 보존된 <code>original.py</code>를 독립 실행하고 다음을 비교합니다.</p>
+<ul>
+<li>STEP 1과 STEP 2 사이의 추상 회로 연산 분리.</li>
+<li>분자 적분과 16비트 측정 배열.</li>
+<li>샘플 순서·값과 샘플링 이후 RNG 상태의 일치.</li>
+<li>총에너지·FCI 값·궤도 점유수.</li>
+<li>반복마다 모든 배치의 차원·에너지·점유수.</li>
+<li>STEP 4를 호출해도 입력 RNG 상태가 바뀌지 않는지.</li>
+</ul>
+<p>비교 테스트의 에너지 허용오차는 1e-8 Ha입니다. 물리적 SQD 수렴 허용오차 1e-3 Ha와 목적이 다릅니다. 전자는 같은 알고리즘을 분리해도 같은 계산을 하는지 검사하고, 후자는 반복 종료를 결정합니다.</p>
+<p>독립 원본 결과를 직접 저장하려면 아직 존재하지 않는 출력 경로를 사용합니다.</p>
+<pre><code class="language-bash">uv run --locked python references/n2_small_scale/run_reference.py --output runs/reference-new
+</code></pre>
+<p>원본 실행기는 <code>hamiltonian.npz</code>, <code>samples.npz</code>, <code>circuit.qpy</code>, <code>rng.json</code>, <code>history.json</code>, <code>result.json</code> 등을 저장합니다. 계산은 현재 모듈을 호출하지 않고 보존 원본 셀에서 실행합니다. 불필요한 QPU·plot import를 제외하고 backend/transpiler seed를 고정하며 결과 저장을 추가한 실행 어댑터입니다.</p>
+<p>기존 검증 환경의 결과는 총에너지 약 −108.59593164616311 Ha, FCI 대비 차이 약 5.57e-5 Ha, SQD 반복 2회였습니다. 이 패키지의 분리 실행 결과·환경은 <a href="../validation/README.md">검증 기록</a>에서 확인합니다. OS·라이브러리·BLAS 차이로 마지막 자릿수나 선택 경로가 달라질 수 있습니다.</p>
+<h2 id="8">8. 변경할 설정과 흔한 문제</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>목적/증상</th>
+<th>확인 위치와 조치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shots 변경</td>
+<td><code>step3_execute()</code>의 <code>shots=100_000</code>. 원본 동일성 검증 조건도 바뀜</td>
+</tr>
+<tr>
+<td>배치·부분공간 크기 변경</td>
+<td><code>step4_postprocess()</code>의 <code>num_batches</code>, <code>samples_per_batch</code>, <code>max_dim</code></td>
+</tr>
+<tr>
+<td>반복·수렴 조절</td>
+<td><code>max_iterations</code>, <code>energy_tol</code>, <code>occupancies_tol</code>; 솔버 내부 반복은 <code>max_cycle</code></td>
+</tr>
+<tr>
+<td>분자·큐비트 변경</td>
+<td><code>step1_map()</code>의 분자·기저·활성 공간·전자 수. 이 번들은 소규모 재현용으로 고정됨</td>
+</tr>
+<tr>
+<td><code>ModuleNotFoundError</code></td>
+<td>이 폴더에서 설치했는지 확인하고 <code>uv run --locked ...</code> 사용</td>
+</tr>
+<tr>
+<td>원본 출력 폴더가 이미 존재</td>
+<td>새 <code>--output</code> 경로 지정. 원본 실행기는 덮어쓰지 않음</td>
+</tr>
+<tr>
+<td>OpenMP 관련 경고</td>
+<td>현재 플랫폼의 PySCF/BLAS 지원 확인. 경고가 수치 검증 실패를 의미하는지 실행 결과와 함께 판단</td>
+</tr>
+<tr>
+<td>큰 문제에서 메모리·시간 급증</td>
+<td>FCI 기준 계산, 상태벡터 시뮬레이션, SQD 대각화를 각각 측정</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>max_dim</code>을 늘리는 것과 큐비트를 늘리는 것은 다릅니다. 현재 솔버의 tensor-product 부분공간은 선택된 α·β 문자열 개수의 곱으로 커집니다. 샘플 다양성이 부족하면 상한을 높여도 실제 차원이 증가하지 않을 수 있습니다.</p>
+<p>현재 STEP 1에는 FCI 비교 계산이 포함됩니다. 20~30큐비트로 확장할 때는 이 기준 계산의 비용을 먼저 검토하고 분리해야 합니다. SDK 이식, 큰 분자 실험, MPI/GPU 연결은 원본 재현 확인 이후의 별도 변경으로 관리하는 것을 권장합니다.</p>
+<h2 id="9">9. 레퍼런스와 출처</h2>
+<ul>
+<li><a href="https://quantum.cloud.ibm.com/docs/en/tutorials/sample-based-quantum-diagonalization#small-scale-simulator-example">IBM SQD 공식 튜토리얼 — small-scale simulator example</a>: 단계 이름과 계산 예제의 기준.</li>
+<li><a href="https://github.com/Qiskit/documentation/blob/64fbdc210b4379f9079e3d8f8e2ee8877cbc3ba2/docs/tutorials/sample-based-quantum-diagonalization.ipynb">고정 notebook revision</a>: 이 패키지에서 사용한 원본 snapshot.</li>
+<li><a href="https://github.com/Qiskit/qiskit-addon-sqd">qiskit-addon-sqd 공개 구현</a>: recovery·부분공간 대각화 구현.</li>
+<li><a href="https://qiskit.github.io/qiskit-addon-sqd/">SQD API 문서</a>: <code>SCIResult</code>, <code>diagonalize_fermionic_hamiltonian</code>, <code>solve_sci_batch</code> 참고. 최신 웹 문서와 고정 설치 버전의 차이에 주의.</li>
+<li><a href="https://github.com/qiskit-community/ffsim">ffsim 공개 구현</a>: LUCJ 회로와 fermionic simulation 도구.</li>
+<li><a href="https://pyscf.org/">PySCF 문서</a>: RHF·CCSD·CASCI·적분 계산.</li>
+<li><a href="../references/n2_small_scale/source.json">원본 출처 정보</a>, <a href="../references/n2_small_scale/LICENSE">Apache-2.0 라이선스</a>, <a href="../NOTICE.md">수정 내역</a>.</li>
+</ul>
+<p>원본의 과학 계산은 유지하고 함수 경계·반환 객체·RNG snapshot을 추가했습니다. SDK decorator나 Slurm 명령을 IBM 예제의 일부인 것처럼 섞지 않았습니다.</p>
+<h2 id="10">10. 문서와 전달본 관리</h2>
+<p>이 문서의 원본은 <code>docs/guide.md</code>입니다. HTML은 아래 명령으로 갱신하며, 현재 <code>run_steps.py</code> 전체 코드도 자동 첨부됩니다.</p>
+<pre><code class="language-bash">uv sync --locked --extra test --extra docs
+uv run --locked --extra docs python tools/build_guide.py
+</code></pre>
+<p>HTML은 오프라인 열람과 브라우저 인쇄를 지원합니다. 폴더를 전달할 때 소스·문서·lockfile·레퍼런스·라이선스·검증 기록을 함께 전달하고 <code>.venv</code>, 캐시, 대규모 실행 결과는 제외합니다.</p>
+<p>작업에는 <code>find-skills</code>로 탐색한 뒤 이미 설치된 <code>documentation-and-adrs</code>(독자별 안내·출처·제약), <code>incremental-implementation</code>(독립 패키지 실행 후 문서화) 지침을 적용했습니다. 코드 의존성 탐색에는 프로젝트의 <code>graphify</code> 지침을 사용했습니다. 외부 스킬을 새로 설치할 필요는 없었습니다.</p>
+<section id="source-code"><h2>부록. run_steps.py 전체 코드</h2>
+<p>문서를 생성할 때 실제 파일에서 읽은 코드입니다. <a href="../run_steps.py">원본 파일 열기</a></p>
+<pre><code>&quot;&quot;&quot;IBM 소규모 예제의 STEP 1~4를 순서대로 실행합니다.
+
+프로젝트 루트에서: python run_steps.py
+계산 본문: sqd_workflow/ibm_steps.py
+공식 예제: https://quantum.cloud.ibm.com/docs/en/tutorials/sample-based-quantum-diagonalization#small-scale-simulator-example
+이 파일은 SDK 연결 전의 로컬 워크플로우이며, Slurm/QPU 작업 제출은 하지 않습니다.
+&quot;&quot;&quot;
+import os
+
+for variable in (&quot;OMP_NUM_THREADS&quot;, &quot;OPENBLAS_NUM_THREADS&quot;, &quot;MKL_NUM_THREADS&quot;):
+    os.environ.setdefault(variable, &quot;1&quot;)
+
+from pyscf import lib
+from threadpoolctl import threadpool_limits
+from sqd_workflow.ibm_steps import (
+    step1_map,
+    step2_optimize,
+    step3_execute,
+    step4_postprocess,
+)
+
+
+def main():
+    lib.num_threads(1)
+    with threadpool_limits(limits=1):
+        print(&quot;[IBM STEP 1/4] Map classical inputs to a quantum problem&quot;, flush=True)
+        mapped = step1_map()
+
+        print(&quot;[IBM STEP 2/4] Optimize for quantum hardware execution&quot;, flush=True)
+        isa_circuit = step2_optimize(mapped)
+
+        print(&quot;[IBM STEP 3/4] Execute using Qiskit primitives&quot;, flush=True)
+        executed = step3_execute(isa_circuit)
+
+        print(&quot;[IBM STEP 4/4] Post-process and return result in desired classical format&quot;, flush=True)
+        # STEP 1의 적분·분자 정보와 STEP 3의 샘플·난수 상태를 함께 사용합니다.
+        result = step4_postprocess(mapped, executed)
+
+    print(f&quot;SQD 반복 횟수: {len(result.result_history)}&quot;)
+    print(f&quot;Alpha 궤도 점유수: {result.result.orbital_occupancies[0]}&quot;)
+    print(f&quot;Beta  궤도 점유수: {result.result.orbital_occupancies[1]}&quot;)
+    return result
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></section></main>
+<footer>독립 실행 패키지 · SDK 연결 전 단계 · 브라우저 인쇄로 PDF 저장 가능</footer>
+</body></html>

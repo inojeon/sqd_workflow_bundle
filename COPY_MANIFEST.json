@@ -1,0 +1,61 @@
+{
+  "description": "Source paths are relative to the original project; hashes identify the copied snapshot.",
+  "files": [
+    {
+      "source": "src/sqd_workflow/ibm_steps.py",
+      "destination": "sqd_workflow/ibm_steps.py",
+      "source_sha256": "397663df981b9daf083ed4c2b342f476d1e93c495bc014b9afbedfc96b8269d1",
+      "destination_sha256": "397663df981b9daf083ed4c2b342f476d1e93c495bc014b9afbedfc96b8269d1",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "tests/test_ibm_steps.py",
+      "destination": "tests/test_ibm_steps.py",
+      "source_sha256": "68df50c8f7f3128d9d571917621386b3b462a6290d92c0802d081be65b0f7a9b",
+      "destination_sha256": "68df50c8f7f3128d9d571917621386b3b462a6290d92c0802d081be65b0f7a9b",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "references/n2_small_scale/original.py",
+      "destination": "references/n2_small_scale/original.py",
+      "source_sha256": "2f3b207f453eb41e6b5e64f1389c86685aa113f1567f370110c6de7653331f19",
+      "destination_sha256": "2f3b207f453eb41e6b5e64f1389c86685aa113f1567f370110c6de7653331f19",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "references/n2_small_scale/run_reference.py",
+      "destination": "references/n2_small_scale/run_reference.py",
+      "source_sha256": "822288d58ceb9b8cdf2b6c15acc7bb63631fa39a104e4470b42185bed0cb3f2a",
+      "destination_sha256": "822288d58ceb9b8cdf2b6c15acc7bb63631fa39a104e4470b42185bed0cb3f2a",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "references/n2_small_scale/source.json",
+      "destination": "references/n2_small_scale/source.json",
+      "source_sha256": "8f14d082c39c4798ef53dcdfaecfb9b034c7941a74611a3148120bc9b7d12333",
+      "destination_sha256": "8f14d082c39c4798ef53dcdfaecfb9b034c7941a74611a3148120bc9b7d12333",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "references/n2_small_scale/LICENSE",
+      "destination": "references/n2_small_scale/LICENSE",
+      "source_sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+      "destination_sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "references/n2_small_scale/README.md",
+      "destination": "references/n2_small_scale/README.md",
+      "source_sha256": "9530ade1d15530afaa6d921dfb3e91fa109eb80a10b83f19d942eba9a5c7dba4",
+      "destination_sha256": "9530ade1d15530afaa6d921dfb3e91fa109eb80a10b83f19d942eba9a5c7dba4",
+      "adaptation": "byte-identical copy"
+    },
+    {
+      "source": "examples/run_steps.py",
+      "destination": "run_steps.py",
+      "source_sha256": "0a93776540e2d550519edb631ebf7c2baa7bf140dfce4114f247bec6121caac3",
+      "destination_sha256": "b0191d40944738176d2c489a76ce884f49710a062478dcd88511790c72adfcef",
+      "adaptation": "Only docstring paths changed"
+    }
+  ]
+}

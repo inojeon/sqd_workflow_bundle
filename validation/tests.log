@@ -1,0 +1,8 @@
+.                                                                        [100%]
+=============================== warnings summary ===============================
+tests/test_ibm_steps.py::test_ibm_steps_match_reference
+  /private/var/folders/zj/3lkct8n50tj6rr_njk46s40c0000gn/T/sqd-bundle-check-tgjwe4jp/bundle/.venv/lib/python3.11/site-packages/pyscf/lib/misc.py:203: UserWarning: OpenMP is not available. Setting omp_threads to 1 has no effects.
+    warnings.warn('OpenMP is not available. '
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 4.47s
