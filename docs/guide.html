@@ -57,6 +57,7 @@ footer { max-width:1144px; margin:auto; padding:24px; color:var(--muted); font-s
 <li><a href="#5">5. 단계 사이의 데이터 계약</a></li>
 <li><a href="#6-sdkslurm">6. SDK·Slurm 워크플로우로 옮기는 방법</a><ul>
 <li><a href="#61-step-slurm-step-4-mpi">6.1 STEP별 Slurm 작업과 STEP 4 MPI 배치 병렬 (구현)</a></li>
+<li><a href="#62-36-mpi">6.2 큰 문제(36큐비트)와 MPI 에뮬레이터 (구현)</a></li>
 </ul>
 </li>
 <li><a href="#7">7. 원본과 같은 계산인지 확인</a></li>
@@ -187,6 +188,11 @@ print(len(result.result_history))
 <td><a href="../slurm/site.env">slurm/</a></td>
 <td>사이트 설정·공유 환경 빌드·작업 사슬 제출</td>
 <td>클러스터에서 실행할 때</td>
+</tr>
+<tr>
+<td><a href="../sqd_workflow/scaled.py">sqd_workflow/scaled.py</a> / <a href="../run_scaled.py">run_scaled.py</a></td>
+<td>문제 크기 일반화(36큐비트), 에뮬레이터 QASM·샘플러</td>
+<td>큰 문제를 돌릴 때</td>
 </tr>
 <tr>
 <td><a href="../tests/test_stages.py">분리 실행 테스트</a></td>
@@ -433,6 +439,58 @@ slurm/submit_chain.sh -w kqsvr04 -n 3 -c 1          # 1노드, STEP 4 3 rank
 slurm/submit_chain.sh -w kqsvr04,kqsvr05 -N 2 -n 3  # STEP 4 2노드 (STEP 1~3은 첫 노드)
 </code></pre>
 <p><code>submit_chain.sh</code>는 실행 폴더 <code>runs/&lt;run_id&gt;/</code>에 번들 사본(<code>code/</code>)을 만들고, STEP 1~4를 <code>--dependency=afterok</code>로 이어 제출합니다. 앞 작업이 실패하면 뒤 작업은 취소됩니다(<code>--kill-on-invalid-dep=yes</code>). STEP 1~3 작업은 SDK의 MPI 자동 감지 변수(<code>SLURM_NTASKS</code> 등)를 지우고 실행합니다. STEP 4는 <code>srun --mpi=pmi2</code>로 rank를 띄우고, <code>--propagate</code>에서 MEMLOCK을 빼 verbs 패브릭이 로그인 노드의 memlock 한도에 걸리지 않게 합니다(sqd_perf X40에서 확인한 설정).</p>
+<h3 id="62-36-mpi">6.2 큰 문제(36큐비트)와 MPI 에뮬레이터 (구현)</h3>
+<p><code>ibm_steps.py</code>는 IBM 예제(16큐비트) 원문 그대로 두고, 같은 계산을 문제 정의로 일반화한 <code>sqd_workflow/scaled.py</code>와 <code>run_scaled.py</code>를 추가했습니다. 파일 계약이 같아서 STEP 4는 <code>run_step.py 4</code>(MPI 배치 병렬)를 그대로 씁니다.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>프리셋</th>
+<th>분자·기저</th>
+<th>활성 공간</th>
+<th style="text-align: right;">큐비트</th>
+<th style="text-align: right;">LUCJ</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n2_sto6g_16q</code></td>
+<td>N₂ 1.0 Å, STO-6G</td>
+<td>8궤도, 전자 10</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">4회</td>
+<td>IBM 예제와 같은 적분·회로·샘플(테스트로 확인)</td>
+</tr>
+<tr>
+<td><code>n2_ccpvdz_36q</code></td>
+<td>N₂ 1.0 Å, cc-pVDZ</td>
+<td>18궤도, 전자 10 (코어 2 동결)</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">1회</td>
+<td>FCI 차원 7.3×10⁷. <code>--norb</code>로 같은 계열의 작은 크기</td>
+</tr>
+</tbody>
+</table></div>
+<p>STEP 3 샘플러는 세 가지입니다.</p>
+<ul>
+<li><code>statevector</code>: Qiskit 상태벡터. 30큐비트 근처까지.</li>
+<li><code>ffsim</code>: 전자 수 보존 공간에서 LUCJ 상태를 정확히 계산해 샘플링. 36큐비트도 1.2 GB.</li>
+<li><code>emulator</code>: pennylane-lightning-MPI <code>mpi_counts_cli</code>(v3)로 2³⁶ 상태벡터를 3노드 64 rank에 나눠 계산해 샘플링.</li>
+</ul>
+<p>STEP 2는 ISA 회로를 에뮬레이터 게이트(h x y z rx ry rz cx cz swap cp)로 바꾼 OpenQASM(<code>step2_emulator.qasm</code>)과, 고전 비트 → 물리 큐비트 대응표(<code>step2_measure_map.json</code>)를 함께 씁니다. 에뮬레이터는 모든 물리 큐비트를 문자열 왼쪽부터 q0 순서로 내므로, STEP 3이 이 대응표로 Qiskit 순서로 되돌립니다.</p>
+<pre><code class="language-bash">python run_scaled.py 1 --problem n2_ccpvdz_36q --workdir W --threads 32   # 적분·FCI·CCSD·LUCJ
+python run_scaled.py 2 --problem n2_ccpvdz_36q --workdir W                # ISA + 에뮬레이터 QASM
+python run_scaled.py 3 --problem n2_ccpvdz_36q --workdir W --sampler ffsim
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -s emulator -N 3 -P 64 -T 08:00:00   # STEP 1~4 Slurm 사슬
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -a &quot;--norb 14 --no-fci&quot;           # 28큐비트(같은 계열)
+python bench/compare_samples.py W                                          # 샘플 ↔ 정확한 분포 검사
+</code></pre>
+<ul>
+<li><strong>에뮬레이터 rank 수는 2의 거듭제곱이어야 합니다.</strong> 아니면 결과가 조용히 틀립니다. <code>submit_scaled.sh</code>가 확인합니다.</li>
+<li><strong>정확성 확인:</strong> 16큐비트 QASM의 분포가 ffsim 정확 분포와 TVD 2×10⁻¹⁴로 같습니다. 16·28·32·34큐비트 에뮬레이터 샘플도 정확한 분포와 통계적으로 구별되지 않습니다.</li>
+<li><strong>STEP 4 설정:</strong> IBM 설정(<code>max_dim=50</code>)이면 큐비트가 늘어도 배치당 D가 2,500에 머물러 에너지가 CCSD보다 높습니다. 큰 문제에는 <code>-x "--set max_dim=1000 --set samples_per_batch=10000"</code>처럼 키웁니다.</li>
+<li>실행 결과: <a href="36큐비트_실행.md">36큐비트 실행 결과</a>.</li>
+</ul>
 <h2 id="7">7. 원본과 같은 계산인지 확인</h2>
 <pre><code class="language-bash">uv run --locked --extra test python -m pytest -q
 </code></pre>

@@ -17,8 +17,9 @@ if ! cmp -s "$HERE/../uv.lock" <(as cat "$WF_ROOT/env-src/uv.lock"); then
   echo "오류: uv.lock 이 공유 환경을 만든 것과 다릅니다. 해결: slurm/setup_env.sh 다시 실행"; exit 1
 fi
 
-RUN_ID=wf_$(date +%Y%m%d-%H%M%S)
+RUN_ID=wf_$(date +%Y%m%d-%H%M%S)_$$        # 같은 초에 여러 번 제출해도 겹치지 않게
 RUN_DIR=$RUNS/$RUN_ID
+as test ! -e "$RUN_DIR" || { echo "오류: $RUN_DIR 이 이미 있습니다"; exit 1; }
 as mkdir -p "$RUN_DIR/code" "$RUN_DIR/work" "$RUN_DIR/logs"
 tar -C "$HERE/.." --exclude=.venv --exclude=__pycache__ --exclude=.pytest_cache -cf - . | as tar -C "$RUN_DIR/code" -xf -
 

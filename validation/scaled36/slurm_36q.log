@@ -1,0 +1,82 @@
+===== step1
+STEP 1 | n2_ccpvdz_36q  | job 3056 | nodes kqsvr04 | 2026-10-08T14:43:11+09:00
+[STEP 1] n2_ccpvdz_36q workdir=/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_20261008-144309_1712586/work
+converged SCF energy = -108.929838385609
+CASCI E = -109.148265084909  E(CI) = -32.9113769800582  S^2 = 0.0000000
+E(CCSD) = -109.1424369765256  E_corr = -0.2125985909163358
+[STEP 1] 완료
+끝 2026-10-08T14:43:59+09:00
+===== step2
+STEP 2 | n2_ccpvdz_36q  | job 3057 | nodes kqsvr04 | 2026-10-08T14:44:01+09:00
+[STEP 2] n2_ccpvdz_36q workdir=/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_20261008-144309_1712586/work
+Gate counts: OrderedDict([('xx_plus_yy', 436), ('cp', 52), ('p', 36), ('measure', 36), ('x', 10), ('barrier', 1)])
+[STEP 2] 완료
+끝 2026-10-08T14:44:02+09:00
+===== step3
+STEP 3 | n2_ccpvdz_36q  | job 3058 | nodes kqsvr[04-06] | 2026-10-08T14:44:04+09:00
+에뮬레이터 /data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli | np 64 | shots 100000 | fuse all | seed 12345
+kqsvr04:22
+kqsvr05:21
+kqsvr06:21
+[lightning-mpi] note: processes per node is not a power of two (balanced distribution mode).
+에뮬레이터 wall 9582.254731380 s
+[STEP 3] n2_ccpvdz_36q workdir=/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_20261008-144309_1712586/work
+[STEP 3] 완료
+끝 2026-10-08T17:23:47+09:00
+===== step4
+STEP 4 | n2_ccpvdz_36q  | job 3059 | nodes kqsvr04 | 2026-10-08T17:23:49+09:00
+[STEP 4] workdir=/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_20261008-144309_1712586/work
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.001068265177309513
+Iteration 1
+	Subsample 0
+		Energy: -109.08006136869255
+		Subspace dimension: 2500
+	Subsample 1
+		Energy: -109.0808446118198
+		Subspace dimension: 2500
+	Subsample 2
+		Energy: -109.07762455910968
+		Subspace dimension: 2500
+Iteration 2
+	Subsample 0
+		Energy: -109.0808446118198
+		Subspace dimension: 2500
+	Subsample 1
+		Energy: -109.0808446118198
+		Subspace dimension: 2500
+	Subsample 2
+		Energy: -109.0808446118198
+		Subspace dimension: 2500
+Final energy: -109.0808446118198
+Final energy error: 0.06742047308914323
+[STEP 4] 완료
+끝 2026-10-08T17:23:51+09:00
+STEP 4 | n2_ccpvdz_36q  | job 3066 | nodes kqsvr04 | 2026-10-08T17:24:55+09:00
+[STEP 4] workdir=/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_20261008-144309_1712586_step4_maxdim1000/work
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.001068265177309513
+Iteration 1
+	Subsample 0
+		Energy: -109.1380466166132
+		Subspace dimension: 213444
+	Subsample 1
+		Energy: -109.1380466166132
+		Subspace dimension: 213444
+	Subsample 2
+		Energy: -109.1380466166132
+		Subspace dimension: 213444
+Iteration 2
+	Subsample 0
+		Energy: -109.1380466166132
+		Subspace dimension: 213444
+	Subsample 1
+		Energy: -109.1380466166132
+		Subspace dimension: 213444
+	Subsample 2
+		Energy: -109.1380466166132
+		Subspace dimension: 213444
+Final energy: -109.1380466166132
+Final energy error: 0.01021846829574713
+[STEP 4] 완료
+끝 2026-10-08T17:25:07+09:00

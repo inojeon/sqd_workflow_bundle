@@ -1,0 +1,74 @@
+{
+  "/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_norb14_20261008-135333_1663470/work": {
+    "qubits": 28,
+    "fci_dimension": 4008004,
+    "norm": 1.000000000000015,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 1643,
+      "xeb_ratio": 1.005891383346169,
+      "top200_chi2": 231.4272897900504,
+      "top200_pvalue": 0.06315811741876977,
+      "top200_exact_mass": 0.968798965343276
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 1617,
+      "xeb_ratio": 1.0052692955182134,
+      "top200_chi2": 212.54525756798566,
+      "top200_pvalue": 0.25856424968133995,
+      "top200_exact_mass": 0.968798965343276
+    }
+  },
+  "/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_norb16_20261008-135333_1663586/work": {
+    "qubits": 32,
+    "fci_dimension": 19079424,
+    "norm": 1.000000000000042,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 1657,
+      "xeb_ratio": 0.9973259748767376,
+      "top200_chi2": 203.82315985660952,
+      "top200_pvalue": 0.41167360493600125,
+      "top200_exact_mass": 0.9662506714232054
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 1649,
+      "xeb_ratio": 1.0049467442971802,
+      "top200_chi2": 191.0249481024661,
+      "top200_pvalue": 0.663552820165013,
+      "top200_exact_mass": 0.9662506714232054
+    }
+  },
+  "/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_norb17_20261008-135333_1663683/work": {
+    "qubits": 34,
+    "fci_dimension": 38291344,
+    "norm": 1.000000000000054,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 862,
+      "xeb_ratio": 0.9976392234940622,
+      "top200_chi2": 204.1542693186239,
+      "top200_pvalue": 0.4053292786621576,
+      "top200_exact_mass": 0.9888024302026773
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 886,
+      "xeb_ratio": 1.0024141827228308,
+      "top200_chi2": 209.38808412639295,
+      "top200_pvalue": 0.3101351717785345,
+      "top200_exact_mass": 0.9888024302026773
+    }
+  }
+}

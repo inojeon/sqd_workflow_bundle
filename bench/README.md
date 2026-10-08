@@ -6,6 +6,7 @@
 | --- | --- |
 | `import_ladder.py` | sqd_perf 사다리 데이터(적분 + 고유 비트열·가중치)를 STEP 1·3 출력 파일로 변환. 가중치대로 shot을 다항분포로 뽑습니다 |
 | `bench_step4.sbatch` | 한 노드(또는 MPI 구성만 2노드)를 독점하고 구성 × 회차를 무작위 순서로 실행. `runs_<job>.tsv`에 벽시계 시간 기록 |
+| `compare_samples.py` | STEP 3 샘플(에뮬레이터 등)이 LUCJ 정확 분포(ffsim)와 맞는지: 전자 수, xeb 비율, 상위 K개 χ². 36큐비트에서도 동작 |
 | `summarize.py` | 구성별 중앙값, 기존 실행(S:1) 대비 속도, 동등성 검사 → `summary/summary.md`·`summary.json` |
 
 ## 구성 표기

@@ -67,6 +67,7 @@ print(len(result.result_history))
 | [run_step.py](../run_step.py) / [sqd_workflow/stages.py](../sqd_workflow/stages.py) | STEP 하나만 실행, STEP 사이 파일 계약 | STEP별 Slurm 작업으로 돌릴 때 |
 | [sqd_workflow/mpi_solver.py](../sqd_workflow/mpi_solver.py) | STEP 4 MPI 배치 병렬 sci_solver | STEP 4를 여러 rank로 돌릴 때 |
 | [slurm/](../slurm/site.env) | 사이트 설정·공유 환경 빌드·작업 사슬 제출 | 클러스터에서 실행할 때 |
+| [sqd_workflow/scaled.py](../sqd_workflow/scaled.py) / [run_scaled.py](../run_scaled.py) | 문제 크기 일반화(36큐비트), 에뮬레이터 QASM·샘플러 | 큰 문제를 돌릴 때 |
 | [분리 실행 테스트](../tests/test_stages.py) | STEP별 프로세스 실행 = 원본, MPI STEP 4 = 단일 프로세스 | 변경 후 검증할 때 |
 | [COPY_MANIFEST.json](../COPY_MANIFEST.json) | 원 프로젝트 복사 출처와 해시 | 전달 이력을 확인할 때 |
 | [NOTICE](../NOTICE.md) | IBM 라이선스와 수정 내역 | 재배포할 때 |
@@ -208,6 +209,37 @@ slurm/submit_chain.sh -w kqsvr04,kqsvr05 -N 2 -n 3  # STEP 4 2노드 (STEP 1~3�
 ```
 
 `submit_chain.sh`는 실행 폴더 `runs/<run_id>/`에 번들 사본(`code/`)을 만들고, STEP 1~4를 `--dependency=afterok`로 이어 제출합니다. 앞 작업이 실패하면 뒤 작업은 취소됩니다(`--kill-on-invalid-dep=yes`). STEP 1~3 작업은 SDK의 MPI 자동 감지 변수(`SLURM_NTASKS` 등)를 지우고 실행합니다. STEP 4는 `srun --mpi=pmi2`로 rank를 띄우고, `--propagate`에서 MEMLOCK을 빼 verbs 패브릭이 로그인 노드의 memlock 한도에 걸리지 않게 합니다(sqd_perf X40에서 확인한 설정).
+
+### 6.2 큰 문제(36큐비트)와 MPI 에뮬레이터 (구현)
+
+`ibm_steps.py`는 IBM 예제(16큐비트) 원문 그대로 두고, 같은 계산을 문제 정의로 일반화한 `sqd_workflow/scaled.py`와 `run_scaled.py`를 추가했습니다. 파일 계약이 같아서 STEP 4는 `run_step.py 4`(MPI 배치 병렬)를 그대로 씁니다.
+
+| 프리셋 | 분자·기저 | 활성 공간 | 큐비트 | LUCJ | 비고 |
+| --- | --- | --- | ---: | ---: | --- |
+| `n2_sto6g_16q` | N₂ 1.0 Å, STO-6G | 8궤도, 전자 10 | 16 | 4회 | IBM 예제와 같은 적분·회로·샘플(테스트로 확인) |
+| `n2_ccpvdz_36q` | N₂ 1.0 Å, cc-pVDZ | 18궤도, 전자 10 (코어 2 동결) | 36 | 1회 | FCI 차원 7.3×10⁷. `--norb`로 같은 계열의 작은 크기 |
+
+STEP 3 샘플러는 세 가지입니다.
+
+- `statevector`: Qiskit 상태벡터. 30큐비트 근처까지.
+- `ffsim`: 전자 수 보존 공간에서 LUCJ 상태를 정확히 계산해 샘플링. 36큐비트도 1.2 GB.
+- `emulator`: pennylane-lightning-MPI `mpi_counts_cli`(v3)로 2³⁶ 상태벡터를 3노드 64 rank에 나눠 계산해 샘플링.
+
+STEP 2는 ISA 회로를 에뮬레이터 게이트(h x y z rx ry rz cx cz swap cp)로 바꾼 OpenQASM(`step2_emulator.qasm`)과, 고전 비트 → 물리 큐비트 대응표(`step2_measure_map.json`)를 함께 씁니다. 에뮬레이터는 모든 물리 큐비트를 문자열 왼쪽부터 q0 순서로 내므로, STEP 3이 이 대응표로 Qiskit 순서로 되돌립니다.
+
+```bash
+python run_scaled.py 1 --problem n2_ccpvdz_36q --workdir W --threads 32   # 적분·FCI·CCSD·LUCJ
+python run_scaled.py 2 --problem n2_ccpvdz_36q --workdir W                # ISA + 에뮬레이터 QASM
+python run_scaled.py 3 --problem n2_ccpvdz_36q --workdir W --sampler ffsim
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -s emulator -N 3 -P 64 -T 08:00:00   # STEP 1~4 Slurm 사슬
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -a "--norb 14 --no-fci"           # 28큐비트(같은 계열)
+python bench/compare_samples.py W                                          # 샘플 ↔ 정확한 분포 검사
+```
+
+- **에뮬레이터 rank 수는 2의 거듭제곱이어야 합니다.** 아니면 결과가 조용히 틀립니다. `submit_scaled.sh`가 확인합니다.
+- **정확성 확인:** 16큐비트 QASM의 분포가 ffsim 정확 분포와 TVD 2×10⁻¹⁴로 같습니다. 16·28·32·34큐비트 에뮬레이터 샘플도 정확한 분포와 통계적으로 구별되지 않습니다.
+- **STEP 4 설정:** IBM 설정(`max_dim=50`)이면 큐비트가 늘어도 배치당 D가 2,500에 머물러 에너지가 CCSD보다 높습니다. 큰 문제에는 `-x "--set max_dim=1000 --set samples_per_batch=10000"`처럼 키웁니다.
+- 실행 결과: [36큐비트 실행 결과](36큐비트_실행.md).
 
 ## 7. 원본과 같은 계산인지 확인
 

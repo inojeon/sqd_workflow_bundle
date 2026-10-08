@@ -266,7 +266,7 @@ slurm/submit_chain.sh -w kqsvr04,kqsvr05 -N 2 -n 3  # STEP 4를 2노드로</code
 <section class="sec" aria-labelledby="s5">
 <div class="sec-head">
 <h2 id="s5"><span class="no">6.</span> 한계와 다음 단계</h2>
-<ul class="list"><li><strong>병렬도:</strong> 배치 수(3)까지입니다. 배치를 늘리면 IBM 설정과 결과가 달라집니다.</li><li><strong>rank 0 구간(약 35초):</strong> sqd_perf의 X38(구성 복구 C 구현, 비트 동일)을 붙이면 반복당 약 12초가 0.1초 아래로 줄 것으로 예상합니다. 아직 적용하지 않았습니다.</li><li><strong>배치 하나는 한 노드 안에서 풉니다.</strong> 노드 메모리를 넘는 D에는 배치 내부 분산 대각화(SBD 등)가 필요합니다. 다만 SBD는 <code>spin_sq</code>를 지원하지 않습니다.</li><li><strong>36큐비트 STEP 1~4 전체 실행:</strong> 번들의 STEP 1(분자 고정)과 STEP 3(상태벡터 샘플러)은 32큐비트 이상을 다루지 못합니다. 문제 정의와 대규모 에뮬레이터 연결이 필요하며, 별도 작업으로 진행합니다.</li></ul>
+<ul class="list"><li><strong>병렬도:</strong> 배치 수(3)까지입니다. 배치를 늘리면 IBM 설정과 결과가 달라집니다.</li><li><strong>rank 0 구간(약 35초):</strong> sqd_perf의 X38(구성 복구 C 구현, 비트 동일)을 붙이면 반복당 약 12초가 0.1초 아래로 줄 것으로 예상합니다. 아직 적용하지 않았습니다.</li><li><strong>배치 하나는 한 노드 안에서 풉니다.</strong> 노드 메모리를 넘는 D에는 배치 내부 분산 대각화(SBD 등)가 필요합니다. 다만 SBD는 <code>spin_sq</code>를 지원하지 않습니다.</li><li><strong>36큐비트 STEP 1~4 전체 실행:</strong> 후속 작업으로 진행했습니다(<code>run_scaled.py</code>, MPI 에뮬레이터 3노드). 결과: <a href="36큐비트_실행.html">36큐비트 실행 결과</a>.</li></ul>
 </div>
 
 </section>
@@ -285,7 +285,7 @@ slurm/submit_chain.sh -w kqsvr04,kqsvr05 -N 2 -n 3  # STEP 4를 2노드로</code
 </div>
 
 </section>
-<footer><span>원본: <code>../sqd_workflow_bundle/docs/MPI_적용_결과.md</code> · HTML 생성 2026-10-08 13:35 (sqdperf.report.md2html)</span></footer>
+<footer><span>원본: <code>../sqd_workflow_bundle/docs/MPI_적용_결과.md</code> · HTML 생성 2026-10-08 17:27 (sqdperf.report.md2html)</span></footer>
 </div>
 </body>
 </html>

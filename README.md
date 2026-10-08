@@ -26,6 +26,14 @@ python run_steps.py
 python -m pytest -q
 ```
 
+### 36큐비트 문제(MPI 에뮬레이터)
+
+`run_scaled.py`는 STEP 1~3을 문제 정의(프리셋)로 실행합니다. `n2_ccpvdz_36q`는 N₂/cc-pVDZ, 활성 궤도 18개(36큐비트)이고, STEP 3은 pennylane-lightning-MPI 에뮬레이터(3노드 64 rank)로 샘플링합니다. 자세한 내용은 [가이드](docs/guide.md) 6.2절과 [36큐비트 실행 결과](docs/36큐비트_실행.md)에 있습니다.
+
+```bash
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -s emulator -N 3 -P 64 -T 08:00:00
+```
+
 ### STEP별 실행과 Slurm
 
 STEP 1~4를 각각 별도 프로세스(별도 Slurm 작업)로 돌릴 수 있습니다. STEP 사이는 `--workdir` 폴더의 파일로 이어지고, STEP 4만 MPI로 배치를 나눠 풉니다. 자세한 파일 계약과 동등성 조건은 [가이드](docs/guide.md) 6.1절에 있습니다.
@@ -52,12 +60,14 @@ pip 경로는 직접 의존성 버전을 고정하지만 전이 의존성은 `uv
 sqd_workflow_bundle/
 ├── run_steps.py                 # 네 단계를 연결하는 실행 진입점
 ├── run_step.py                  # STEP 하나만 실행(STEP별 Slurm 작업용)
+├── run_scaled.py                # 큰 문제(36큐비트) STEP 1~3, 에뮬레이터 샘플러
 ├── sqd_workflow/
 │   ├── __init__.py
 │   ├── ibm_steps.py             # 계산 함수 4개와 입출력 dataclass
 │   ├── stages.py                # STEP 사이 파일 계약(npz·qpy·json)
-│   └── mpi_solver.py            # STEP 4 MPI 배치 병렬 sci_solver
-├── slurm/                       # site.env·setup_env.sh·step.sbatch·submit_chain.sh
+│   ├── mpi_solver.py            # STEP 4 MPI 배치 병렬 sci_solver
+│   └── scaled.py                # 문제 크기 일반화, 에뮬레이터 QASM·counts 변환
+├── slurm/                       # site.env·setup_env.sh·step.sbatch·submit_chain.sh, scaled_step.sbatch·submit_scaled.sh
 ├── pyproject.toml              # 설치·테스트·문서 의존성
 ├── uv.lock                     # 전이 의존성까지 고정
 ├── docs/guide.md                # 가이드 원본

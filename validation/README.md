@@ -78,3 +78,16 @@ STEP별 실행(`run_step.py`, `sqd_workflow/stages.py`), STEP 4 MPI 배치 병�
 **성능.** STEP 4 단일 프로세스 대 MPI 배치 병렬 비교는 [bench_step4/README.md](bench_step4/README.md)([HTML](bench_step4/report.html))에 있습니다. 요약: IBM 예제 크기에서는 MPI가 느리고(0.79배), 배치당 D 10⁵·10⁶·4×10⁶에서는 같은 코어 수의 단일 프로세스보다 1.08·1.25·1.44배 빠릅니다.
 
 **하지 않은 것.** 작업 실패 시 뒤 작업 취소(`--kill-on-invalid-dep`)와 rank 예외 시 `Abort` 경로는 일부러 실패시켜 확인하지 않았습니다.
+
+## 2026-10-08 추가 검증: 36큐비트 문제와 MPI 에뮬레이터
+
+`run_scaled.py`(문제 크기 일반화)와 pennylane-lightning-MPI 에뮬레이터로 N₂/cc-pVDZ 36큐비트 STEP 1~4를 Slurm에서 실행했습니다.
+
+- **테스트(kqdata01): 7 passed.** 기존 4개에 3개를 더했습니다.
+  - 16큐비트 프리셋 = IBM STEP 1~3
+  - 에뮬레이터 QASM 분포 = ffsim 정확 분포
+  - counts 비트 순서
+- **실행 결과:** 에뮬레이터 2시간 40분(3노드 64 rank, 노드당 371 GB). 샘플은 정확한 분포와 통계적으로 일치했고, SQD 에너지는 FCI +10.2 mHa입니다.
+- **크기별 측정:** 28·32·34큐비트도 함께 측정했습니다.
+
+전체 내용은 [36큐비트 실행 결과](../docs/36큐비트_실행.md)에 있고, 원자료는 [scaled36/](scaled36/)에 있습니다.

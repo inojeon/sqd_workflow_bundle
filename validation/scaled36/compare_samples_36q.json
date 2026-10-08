@@ -1,0 +1,50 @@
+{
+  "/data01/hpcuser/sqd/workflow/runs/sc_n2_ccpvdz_36q_20261008-144309_1712586/work": {
+    "qubits": 36,
+    "fci_dimension": 73410624,
+    "norm": 1.0000000000000488,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 2203,
+      "xeb_ratio": 0.9984279617064166,
+      "top200_chi2": 223.9259643340451,
+      "top200_pvalue": 0.11807000251107982,
+      "top200_exact_mass": 0.9575416064325317
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 2145,
+      "xeb_ratio": 1.0048678170969885,
+      "top200_chi2": 185.3073577506005,
+      "top200_pvalue": 0.7642018647895028,
+      "top200_exact_mass": 0.9575416064325317
+    }
+  },
+  "/tmp/claude-1001/-home-kq-Workspace-SQD-bench/5a8bf7d1-dce8-4a9c-b5ba-8a6348e908b3/scratchpad/ff36": {
+    "qubits": 36,
+    "fci_dimension": 73410624,
+    "norm": 1.0000000000000488,
+    "sampler": "ffsim",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 2189,
+      "xeb_ratio": 1.001134215736021,
+      "top200_chi2": 196.47003622693234,
+      "top200_pvalue": 0.5573116876251158,
+      "top200_exact_mass": 0.9575416064325317
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 2145,
+      "xeb_ratio": 1.0048678170969885,
+      "top200_chi2": 185.3073577506005,
+      "top200_pvalue": 0.7642018647895028,
+      "top200_exact_mass": 0.9575416064325317
+    }
+  }
+}
