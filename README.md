@@ -6,6 +6,8 @@
 
 **MPI 적용 결과(2026-10-08):** [정리 문서](docs/MPI_적용_결과.md) · [HTML](docs/MPI_적용_결과.html)
 
+**최대 규모 시험(2026-10-09):** H₁₈ 36큐비트, 대각화 D = 10⁸ — [정리 문서](docs/최대규모_H18_36큐비트.md) · [HTML](docs/최대규모_H18_36큐비트.html)
+
 ## 설치와 실행
 
 Python 3.11과 [uv](https://docs.astral.sh/uv/getting-started/installation/)를 준비하고 **이 폴더 안에서** 실행합니다. 최초 설치에는 인터넷이 필요합니다.
@@ -28,7 +30,7 @@ python -m pytest -q
 
 ### 36큐비트 문제(MPI 에뮬레이터)
 
-`run_scaled.py`는 STEP 1~3을 문제 정의(프리셋)로 실행합니다. `n2_ccpvdz_36q`는 N₂/cc-pVDZ, 활성 궤도 18개(36큐비트)이고, STEP 3은 pennylane-lightning-MPI 에뮬레이터(3노드 64 rank)로 샘플링합니다. 자세한 내용은 [가이드](docs/guide.md) 6.2절과 [36큐비트 실행 결과](docs/36큐비트_실행.md)에 있습니다.
+`run_scaled.py`는 STEP 1~3을 문제 정의(프리셋)로 실행합니다. `n2_ccpvdz_36q`는 N₂/cc-pVDZ, 활성 궤도 18개(36큐비트), `h18_sto6g_36q`는 수소 사슬 H₁₈ 반 채움(36큐비트, D 상한 2.4×10⁹)이고, STEP 3은 pennylane-lightning-MPI 에뮬레이터(3노드 64 rank)로 샘플링합니다. 자세한 내용은 [가이드](docs/guide.md) 6.2절과 [36큐비트 실행 결과](docs/36큐비트_실행.md)에 있습니다.
 
 ```bash
 slurm/submit_scaled.sh -p n2_ccpvdz_36q -s emulator -N 3 -P 64 -T 08:00:00
