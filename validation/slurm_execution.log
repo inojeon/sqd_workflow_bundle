@@ -1,0 +1,46 @@
+===== step1-2982.out
+STEP 1 | job 2982 | nodes kqsvr04 | ntasks 1 | cpus/task 1 | 2026-10-08T10:56:05+09:00
+[STEP 1] workdir=/data01/hpcuser/sqd/workflow/runs/wf_20261008-105603/work
+converged SCF energy = -108.464957764796
+CASCI E = -108.595987350986  E(CI) = -32.4115475088426  S^2 = 0.0000000
+norb = 8
+nelec = (5, 5)
+E(CCSD) = -108.5933309085007  E_corr = -0.1283731437052355
+[STEP 1] 완료
+===== step2-2983.out
+STEP 2 | job 2983 | nodes kqsvr04 | ntasks 1 | cpus/task 1 | 2026-10-08T10:56:14+09:00
+[STEP 2] workdir=/data01/hpcuser/sqd/workflow/runs/wf_20261008-105603/work
+Gate counts: OrderedDict([('xx_plus_yy', 254), ('cp', 88), ('p', 64), ('measure', 16), ('x', 10), ('barrier', 1)])
+[STEP 2] 완료
+===== step3-2984.out
+STEP 3 | job 2984 | nodes kqsvr04 | ntasks 1 | cpus/task 1 | 2026-10-08T10:56:17+09:00
+[STEP 3] workdir=/data01/hpcuser/sqd/workflow/runs/wf_20261008-105603/work
+[STEP 3] 완료
+===== step4-2985.out
+STEP 4 | job 2985 | nodes kqsvr04 | ntasks 3 | cpus/task 1 | 2026-10-08T10:56:20+09:00
+[STEP 4] workdir=/data01/hpcuser/sqd/workflow/runs/wf_20261008-105603/work
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.0478515625
+Iteration 1
+	Subsample 0
+		Energy: -108.59592219311702
+		Subspace dimension: 2500
+	Subsample 1
+		Energy: -108.59592219311702
+		Subspace dimension: 2500
+	Subsample 2
+		Energy: -108.59592219311702
+		Subspace dimension: 2500
+Iteration 2
+	Subsample 0
+		Energy: -108.59592219311702
+		Subspace dimension: 2500
+	Subsample 1
+		Energy: -108.59592219311702
+		Subspace dimension: 2500
+	Subsample 2
+		Energy: -108.59592219311702
+		Subspace dimension: 2500
+Final energy: -108.59592219311702
+Final energy error: 6.515786900251896e-05
+[STEP 4] 완료

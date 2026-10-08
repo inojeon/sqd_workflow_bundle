@@ -1,7 +1,8 @@
 # Adapted from IBM/Qiskit documentation code snippets, Apache-2.0.
 # Source revision and license: references/n2_small_scale/{source.json,LICENSE}.
 # Changes: four explicit functions, typed outputs, RNG snapshot/restore,
-# optional deterministic compilation seeds, Korean boundary comments.
+# optional deterministic compilation seeds, Korean boundary comments,
+# optional STEP 4 sci_solver wrapper (MPI batch parallelism) and settings override.
 """IBM small-scale simulator example의 STEP 1~4를 그대로 나눈 계산 모듈.
 
 STEP 1 Map classical inputs to a quantum problem
@@ -15,7 +16,7 @@ STEP 1에 원본의 FCI 비교 계산도 포함되므로 대규모 설정으로 
 """
 from dataclasses import dataclass
 import copy
-from typing import Any
+from typing import Any, Callable
 import math
 
 import ffsim
@@ -179,8 +180,20 @@ def step3_execute(isa_circuit: QuantumCircuit) -> ExecutedCircuit:
     return ExecutedCircuit(pub_result, copy.deepcopy(rng.bit_generator.state))
 
 
-def step4_postprocess(mapped: MappedProblem, executed: ExecutedCircuit) -> PostprocessedResult:
-    """측정 통계, 구성 복구·대각화 반복, FCI 오차 계산을 모두 담당합니다."""
+# step4_postprocess의 settings로 바꿀 수 있는 원문 설정 이름.
+STEP4_SETTINGS = ("energy_tol", "occupancies_tol", "max_iterations", "num_batches",
+                  "samples_per_batch", "max_dim", "max_cycle")
+
+
+def step4_postprocess(mapped: MappedProblem, executed: ExecutedCircuit, *,
+                      wrap_solver: Callable | None = None,
+                      settings: dict | None = None) -> PostprocessedResult:
+    """측정 통계, 구성 복구·대각화 반복, FCI 오차 계산을 모두 담당합니다.
+
+    wrap_solver: 원문의 sci_solver(spin_sq·max_cycle 포함)를 받아 대체 solver를 돌려주는 함수.
+    None이면 원문 그대로입니다. MPI 배치 병렬은 sqd_workflow.mpi_solver.batch_parallel을 넘깁니다.
+    settings: STEP4_SETTINGS 중 바꿀 값(성능 측정에서 문제 크기를 키울 때). None이면 원문 설정 그대로입니다.
+    """
     norb = mapped.norb
     nelec = mapped.nelec
     n_alpha, n_beta = nelec
@@ -230,6 +243,17 @@ def step4_postprocess(mapped: MappedProblem, executed: ExecutedCircuit) -> Postp
     symmetrize_spin = True
     carryover_threshold = 1e-4
     max_cycle = 200
+    if settings:
+        unknown = set(settings) - set(STEP4_SETTINGS)
+        if unknown:
+            raise ValueError(f"바꿀 수 없는 STEP 4 설정: {sorted(unknown)} (가능: {STEP4_SETTINGS})")
+        energy_tol = settings.get("energy_tol", energy_tol)
+        occupancies_tol = settings.get("occupancies_tol", occupancies_tol)
+        max_iterations = settings.get("max_iterations", max_iterations)
+        num_batches = settings.get("num_batches", num_batches)
+        samples_per_batch = settings.get("samples_per_batch", samples_per_batch)
+        max_dim = settings.get("max_dim", max_dim)
+        max_cycle = settings.get("max_cycle", max_cycle)
 
     # Use the Hartree-Fock configuration as an initial guess for the orbital occupancies
     initial_occupancies = (
@@ -241,6 +265,8 @@ def step4_postprocess(mapped: MappedProblem, executed: ExecutedCircuit) -> Postp
     # you can omit this step, in which case you would not specify the sci_solver argument
     # in the call to diagonalize_fermionic_hamiltonian below.
     sci_solver = partial(solve_sci_batch, spin_sq=0.0, max_cycle=max_cycle)
+    if wrap_solver is not None:
+        sci_solver = wrap_solver(sci_solver)
 
     # List to capture intermediate results
     result_history = []
