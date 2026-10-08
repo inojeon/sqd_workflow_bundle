@@ -46,11 +46,15 @@ class ProblemSpec:
 
 
 N2_ATOM = (("N", (0.0, 0.0, -0.5)), ("N", (0.0, 0.0, 0.5)))
+H18_CHAIN = tuple(("H", (0.0, 0.0, 1.0 * i)) for i in range(18))
 PRESETS = {
     # IBM 예제와 같은 문제(검증용)
     "n2_sto6g_16q": ProblemSpec("n2_sto6g_16q", N2_ATOM, "sto-6g", "Dooh", 2, None, 4),
     # 36큐비트: IBM 예제의 N₂(1.0 Å, 코어 2개 동결, 전자 10개)에서 기저만 cc-pVDZ, 활성 궤도 18개
     "n2_ccpvdz_36q": ProblemSpec("n2_ccpvdz_36q", N2_ATOM, "cc-pvdz", "Dooh", 2, 18, 1),
+    # 고전 대각화 규모 최대화: 수소 사슬 H18(1.0 Å 간격), STO-6G 18궤도·전자 (9,9) 반 채움 → D 상한 2.4×10⁹.
+    # FCI는 계산하지 않고 CCSD(T)를 기록합니다.
+    "h18_sto6g_36q": ProblemSpec("h18_sto6g_36q", H18_CHAIN, "sto-6g", False, 0, None, 4, fci=False),
 }
 
 
@@ -112,6 +116,11 @@ def stage1(workdir: Path, spec: ProblemSpec) -> None:
     t0 = time.perf_counter()
     ccsd = pyscf.cc.CCSD(scf, frozen=[i for i in range(norb_total) if i not in active_space]).run()
     timing["ccsd_seconds"] = time.perf_counter() - t0
+    ccsd_t = float("nan")
+    if not spec.fci:                       # FCI 대신 기준값으로 CCSD(T)
+        t0 = time.perf_counter()
+        ccsd_t = float(ccsd.e_tot + ccsd.ccsd_t())
+        timing["ccsd_t_seconds"] = time.perf_counter() - t0
     _, pairs_ab = _pass_manager(norb, spec.compilation_seed)
     ucj_op = _ucj_operator(norb, ccsd, spec.n_reps, pairs_ab)
     qubits = QuantumRegister(2 * norb, name="q")
@@ -125,7 +134,8 @@ def stage1(workdir: Path, spec: ProblemSpec) -> None:
     (workdir / "step1_ucj.pkl").write_bytes(pickle.dumps(ucj_op))       # ffsim 샘플러용
     _write_meta(workdir, 1, ["step1_problem.npz", "step1_circuit.pkl", "step1_ucj.pkl"], [], started,
                 compilation_seed=spec.compilation_seed, norb=norb, nelec=list(nelec), qubits=2 * norb,
-                reference_energy=reference_energy, ccsd_energy=float(ccsd.e_tot), rhf_energy=float(scf.e_tot),
+                reference_energy=reference_energy, ccsd_energy=float(ccsd.e_tot), ccsd_t_energy=ccsd_t,
+                rhf_energy=float(scf.e_tot),
                 fci_dimension=math.comb(norb, nelec[0]) * math.comb(norb, nelec[1]), spec=asdict(spec), timing=timing)
 
 
@@ -217,9 +227,20 @@ def stage3(workdir: Path, spec: ProblemSpec, *, sampler: str, counts_file: Path 
         _write_samples(workdir, result.data.meas.to_bool_array(), sampler, started, ["step2_isa.qpy"])
     elif sampler == "ffsim":
         _require(workdir, "step1_ucj.pkl")
-        strings, probs = exact_probabilities(workdir)
-        idx = rng.choice(len(probs), size=spec_d["shots"], p=probs / probs.sum())
-        _write_samples(workdir, strings[idx], sampler, started, ["step1_ucj.pkl"], norm=float(probs.sum()))
+        import ffsim
+        norb, nelec = meta["norb"], tuple(meta["nelec"])
+        ucj_op = pickle.loads((workdir / "step1_ucj.pkl").read_bytes())
+        t0 = time.perf_counter()
+        vec = ffsim.apply_unitary(ffsim.hartree_fock_state(norb, nelec), ucj_op, norb=norb, nelec=nelec, copy=False)
+        probs = np.abs(vec) ** 2
+        del vec
+        evolve_s = time.perf_counter() - t0
+        norm = float(probs.sum())
+        probs /= norm
+        idx = rng.choice(len(probs), size=spec_d["shots"], p=probs)   # 뽑힌 주소만 문자열로 바꿉니다(큰 차원 메모리)
+        strings = ffsim.addresses_to_strings(idx, norb, nelec, bitstring_type=ffsim.BitstringType.BIT_ARRAY)
+        _write_samples(workdir, np.asarray(strings, dtype=bool), sampler, started, ["step1_ucj.pkl"], norm=norm,
+                       dimension=int(len(probs)), evolve_seconds=evolve_s, sample_seconds=time.perf_counter() - t0 - evolve_s)
     elif sampler == "emulator":
         _require(workdir, "step2_measure_map.json")
         counts_file = counts_file or workdir / "step3_emulator_counts.json"

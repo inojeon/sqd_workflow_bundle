@@ -36,7 +36,8 @@ case "$STEP" in
       open('$W/step3_emulator.json','w'), indent=2)"
     echo "에뮬레이터 wall $(echo "$t1 - $t0" | bc) s"
   fi
-  "${NO_MPI[@]}" "$PY" run_scaled.py 3 --problem "$PROBLEM" --workdir "$W" --sampler "$SAMPLER" "${SARGS[@]}" ;;
+  "${NO_MPI[@]}" "$PY" run_scaled.py 3 --problem "$PROBLEM" --workdir "$W" --sampler "$SAMPLER" \
+    --threads "${SLURM_CPUS_PER_TASK:-1}" "${SARGS[@]}" ;;
 4)
   THREADS=${SLURM_CPUS_PER_TASK:-1}
   export PATH=$MPI_HOME/bin:$PATH LD_LIBRARY_PATH=$MPI_HOME/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}

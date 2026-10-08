@@ -16,7 +16,7 @@ from pathlib import Path
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("step", type=int, choices=[1, 2, 3])
-    ap.add_argument("--problem", required=True, help="프리셋: n2_sto6g_16q(IBM 예제) | n2_ccpvdz_36q")
+    ap.add_argument("--problem", required=True, help="프리셋: n2_sto6g_16q(IBM 예제) | n2_ccpvdz_36q | h18_sto6g_36q")
     ap.add_argument("--workdir", type=Path, required=True)
     ap.add_argument("--norb", type=int, help="활성 궤도 수 덮어쓰기(큐비트 = 2·norb). 작은 크기 검증·시간 측정용")
     ap.add_argument("--n-reps", type=int, help="LUCJ 반복 수 덮어쓰기")
@@ -24,13 +24,16 @@ def main(argv=None) -> int:
     ap.add_argument("--shots", type=int, help="STEP 3 shot 수 덮어쓰기(기본 100,000)")
     ap.add_argument("--sampler", choices=["statevector", "ffsim", "emulator"], help="STEP 3 샘플러")
     ap.add_argument("--counts", type=Path, help="--sampler emulator: 에뮬레이터 counts JSON")
-    ap.add_argument("--threads", type=int, default=1, help="OpenMP 스레드(STEP 1의 FCI·CCSD)")
+    ap.add_argument("--threads", type=int, default=1,
+                    help="OpenMP 스레드(STEP 1의 FCI·CCSD). STEP 3 ffsim은 BLAS 스레드도 이 값(STEP 1·2의 BLAS는 1)")
     args = ap.parse_args(argv)
     if args.step == 3 and not args.sampler:
         ap.error("STEP 3에는 --sampler가 필요합니다")
     for variable in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
         os.environ[variable] = "1"
     os.environ["OMP_NUM_THREADS"] = str(args.threads)
+    blas = args.threads if args.step == 3 else 1
+    os.environ["OPENBLAS_NUM_THREADS"] = os.environ["MKL_NUM_THREADS"] = str(blas)
 
     from pyscf import lib
     from threadpoolctl import threadpool_limits
@@ -41,7 +44,7 @@ def main(argv=None) -> int:
     workdir = args.workdir.resolve()
     workdir.mkdir(parents=True, exist_ok=True)
     lib.num_threads(args.threads)
-    with threadpool_limits(limits={"openmp": args.threads, "blas": 1}):
+    with threadpool_limits(limits={"openmp": args.threads, "blas": blas}):
         print(f"[STEP {args.step}] {spec.name} workdir={workdir}", flush=True)
         if args.step == 1:
             scaled.stage1(workdir, spec)
