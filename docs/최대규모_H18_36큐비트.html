@@ -256,9 +256,10 @@ del { color: var(--muted); }
 <tr><td>32큐비트 H₁₆, 3노드 64 rank</td><td>일치 (15분)</td></tr>
 <tr><td>28큐비트 H₁₄ LUCJ 4회(게이트 6,574개 &gt; H₁₈의 6,170개), 3노드 64 rank</td><td>일치</td></tr>
 <tr><td>36큐비트 N₂(좁은 분포), 3노드 64 rank</td><td>일치</td></tr>
+<tr><td>30큐비트(넓은 분포), 1노드 rank 1개(로컬 30큐비트)·4개</td><td>일치</td></tr>
 <tr><td><strong>36큐비트 H₁₈(넓은 분포), 3노드 64 rank</strong></td><td><strong>불일치</strong></td></tr>
 </tbody></table></div>
-<ul class="list"><li>다중 노드 균형 분배, rank 수, 게이트 수는 원인이 아니다.</li><li>남은 가설: 36큐비트에서 64 rank면 rank당 로컬 큐비트가 30개(복소수 2³⁰ = double 2³¹개)라 32비트 정수 인덱스가 넘칠 수 있다. 34큐비트 이하에서는 2³¹ 미만이다. N₂ 36큐비트는 영향받는 인덱스 영역(높은 큐비트가 1인 상태)의 진폭이 작아 드러나지 않았을 수 있다.</li><li><strong>검사 중:</strong> 30큐비트 회로를 rank 1개(로컬 30큐비트)와 4개(로컬 28큐비트)로 돌려 비교한다(작업 3098, kqsvr04). rank 1개만 틀리면 가설이 맞고, 그 경우 36큐비트는 <strong>128 rank 이상</strong>(로컬 ≤ 29큐비트)으로 돌리면 피해 갈 수 있다. 결과는 <code>validation/h18_36q/emulator_diag/README.txt</code>에 추가된다.</li><li>에뮬레이터는 qc-cloud 쪽 소프트웨어라 이 번들에서 고치지 않는다. 재현 조건(36큐비트 QASM, 명령, 비교 스크립트)은 모두 보관했다.</li></ul>
+<ul class="list"><li>다중 노드 균형 분배, rank 수, 게이트 수는 원인이 아니다.</li><li>로컬 크기 가설(rank당 로컬 큐비트 30개 = double 2³¹개에서 32비트 인덱스가 넘침)은 <strong>기각</strong>됐다. 30큐비트 회로를 rank 1개(로컬 30큐비트, 105분)와 4개(로컬 28큐비트, 27분)로 돌린 결과가 모두 정확 분포와 일치했다(작업 3099, kqsvr04).</li><li>남은 가설: <strong>전역 인덱스가 2³²를 넘는 상태</strong>(물리 큐비트 32~35가 1인 성분)에서 틀린다. 32큐비트까지는 전역 인덱스가 32비트에 들어간다. N₂ 36큐비트에서 물리 큐비트 32~35는 가장 높은 가상 궤도(16·17번)의 스핀 궤도라 점유가 거의 없어 드러나지 않았을 수 있고, H₁₈에서는 이 궤도의 점유가 0.16~0.20이다.</li><li><strong>검사 방법:</strong> 34큐비트의 넓은 상태(H₁₈ 사슬, 궤도 17개·전자 (9,9))를 3노드 64 rank로 돌리면 가른다(약 1.5시간). 틀리면 33큐비트 이상 전역 인덱스 문제, 맞으면 36큐비트 고유 문제다.</li><li>에뮬레이터는 qc-cloud 쪽 소프트웨어라 이 번들에서 고치지 않는다. 재현 조건(36큐비트 QASM, 명령, 비교 스크립트)은 모두 보관했다.</li></ul>
 </div>
 
 </section>
@@ -274,7 +275,7 @@ slurm/submit_step4.sh -r &lt;run_dir&gt; -t d1e8 -s 100000 -x &quot;--set max_di
 </div>
 
 </section>
-<footer><span>원본: <code>../sqd_workflow_bundle/docs/최대규모_H18_36큐비트.md</code> · HTML 생성 2026-10-09 01:10 (sqdperf.report.md2html)</span></footer>
+<footer><span>원본: <code>../sqd_workflow_bundle/docs/최대규모_H18_36큐비트.md</code> · HTML 생성 2026-10-12 08:31 (sqdperf.report.md2html)</span></footer>
 </div>
 </body>
 </html>

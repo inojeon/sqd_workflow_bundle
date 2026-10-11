@@ -1,0 +1,50 @@
+{
+  "/tmp/claude-1001/-home-kq-Workspace-SQD-bench/5a8bf7d1-dce8-4a9c-b5ba-8a6348e908b3/scratchpad/h30_np1": {
+    "qubits": 30,
+    "fci_dimension": 41409225,
+    "norm": 1.0000000000000826,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 26999,
+      "xeb_ratio": 0.9949894102743856,
+      "top200_chi2": 188.66177090638078,
+      "top200_pvalue": 0.7069484597734912,
+      "top200_exact_mass": 0.44322358600605244
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 26700,
+      "xeb_ratio": 1.009081187957387,
+      "top200_chi2": 223.49390530118922,
+      "top200_pvalue": 0.1220822810626589,
+      "top200_exact_mass": 0.44322358600605244
+    }
+  },
+  "/tmp/claude-1001/-home-kq-Workspace-SQD-bench/5a8bf7d1-dce8-4a9c-b5ba-8a6348e908b3/scratchpad/h30_np4": {
+    "qubits": 30,
+    "fci_dimension": 41409225,
+    "norm": 1.0000000000000826,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 26629,
+      "xeb_ratio": 0.9898206499032765,
+      "top200_chi2": 205.96273082522399,
+      "top200_pvalue": 0.3712730476871239,
+      "top200_exact_mass": 0.44322358600605244
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 26700,
+      "xeb_ratio": 1.009081187957387,
+      "top200_chi2": 223.49390530118922,
+      "top200_pvalue": 0.1220822810626589,
+      "top200_exact_mass": 0.44322358600605244
+    }
+  }
+}
