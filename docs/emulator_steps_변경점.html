@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>emulator_steps.py: ibm_steps.py와 무엇이 다른가</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one reading column (max 1000px). Header and summary strip, contents, then numbered sections; wide tables scroll inside their own frame. Numbers in mono. */
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --ink: #121722; --ink-2: #454f62; --muted: #737c90;
+  --line: #e0e4eb; --line-strong: #c4cbd7; --chip: #eef1f5; --accent: #1f63b8;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --good: #0ca30c; --good-ink: #006300; --critical: #d03b3b; --critical-ink: #b02c2c;
+  --h-r3: #a82a22; --h-r2: #e0726b; --h-r1: #f6d3cf; --h-n: #ecebe7; --h-b1: #d4e5fb;
+  --h-b2: #9ec5f4; --h-b3: #5598e7; --h-b4: #256abf; --h-b5: #104281;
+  --h-ink-dark: #14181f; --h-ink-light: #ffffff; --h-n-ink: #14181f;
+  --font-sans: "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --step--1: 0.8125rem; --step-0: 0.9375rem; --step-1: 1.125rem; --step-2: 1.375rem; --step-3: 1.875rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --surface: #161a21; --ink: #eef1f6; --ink-2: #b6bdcb; --muted: #8a92a3;
+    --line: #272d37; --line-strong: #3a4250; --chip: #1f242d; --accent: #6da7ec;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --good-ink: #3dbd3d; --critical-ink: #ef7373; --h-n: #383835; --h-n-ink: #eef1f6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --surface: #161a21; --ink: #eef1f6; --ink-2: #b6bdcb; --muted: #8a92a3;
+  --line: #272d37; --line-strong: #3a4250; --chip: #1f242d; --accent: #6da7ec;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --good-ink: #3dbd3d; --critical-ink: #ef7373; --h-n: #383835; --h-n-ink: #eef1f6;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: var(--step-0); line-height: 1.65;
+  word-break: keep-all; overflow-wrap: break-word; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.page { max-width: 1000px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 48px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: var(--step-3); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: var(--step-2); font-weight: 600; }
+h3 { font-size: var(--step-1); font-weight: 600; }
+h2[id], h3[id] { scroll-margin-top: 16px; }
+p { margin: 0; max-width: 68ch; }
+strong { font-weight: 600; }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+code { background: var(--chip); padding: 0.05em 0.35em; border-radius: 4px; overflow-wrap: anywhere; word-break: normal; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.ink2 { color: var(--ink-2); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* Header */
+.page > header { display: grid; gap: 14px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--font-mono); font-size: var(--step--1); color: var(--ink-2); }
+.meta span { white-space: nowrap; }
+.verdict { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 8px; border-radius: 999px; width: fit-content; max-width: 100%;
+  background: var(--chip); color: var(--ink-2); font-weight: 600; font-size: var(--step--1); }
+.verdict svg { flex: none; color: var(--accent); }
+.lede { font-size: var(--step-1); color: var(--ink-2); max-width: 62ch; }
+.lede strong { color: var(--ink); }
+@media (max-width: 480px) { .meta span { white-space: normal; } }
+
+/* Stat strip */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line); }
+.stat { padding: 16px 16px 18px 0; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.stat + .stat { padding-left: 16px; border-left: 1px solid var(--line); }
+.stat .v { font-family: var(--font-mono); font-size: 1.75rem; font-weight: 500; line-height: 1.15; }
+.stat .v small { font-size: 0.55em; color: var(--muted); font-weight: 400; margin-left: 2px; }
+.stat .k { font-size: var(--step--1); color: var(--ink-2); }
+.stat .k a { font-family: var(--font-mono); white-space: nowrap; }
+.stat.warn .v { color: var(--critical-ink); }
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) { .stat .v { font-size: 1.45rem; } }
+
+/* Contents */
+.toc { display: grid; gap: 12px; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px 18px; }
+.toc-title { font-family: var(--font-mono); font-size: var(--step--1); font-weight: 500; letter-spacing: 0.06em; color: var(--muted); }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(5, auto); grid-auto-flow: column; gap: 14px 36px; }
+.toc li { display: grid; gap: 3px; align-content: start; min-width: 0; }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+.toc .top { color: var(--ink); font-weight: 600; }
+.toc .no { display: inline-block; min-width: 26px; }
+.toc .subs { display: flex; flex-wrap: wrap; gap: 2px 14px; padding-left: 26px; font-size: var(--step--1); }
+.toc .subs a { color: var(--ink-2); }
+.toc .subs .mono { color: var(--muted); }
+@media (max-width: 640px) { .toc ol { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-flow: row; } }
+
+/* Sections */
+.sec { display: grid; gap: 28px; min-width: 0; border-top: 1px solid var(--line-strong); padding-top: 26px; }
+.sec-head, .sub { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.no { font-family: var(--font-mono); font-weight: 500; color: var(--accent); }
+.h-note { font-size: var(--step--1); font-weight: 400; color: var(--muted); }
+.note { font-size: var(--step--1); color: var(--muted); }
+
+/* Lists */
+.list { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.list ul { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.list li::marker, .findings ul li::marker, .urls li::marker { color: var(--muted); }
+.findings { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: f; }
+.findings > li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 12px; counter-increment: f; }
+.findings > li::before { content: counter(f); font-family: var(--font-mono); font-weight: 600; color: var(--accent);
+  border: 1px solid var(--line-strong); border-radius: 6px; height: 28px; display: grid; place-items: center; font-size: var(--step--1); }
+.findings > li > div { display: grid; gap: 6px; min-width: 0; }
+.findings p { max-width: 70ch; }
+.findings ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 72ch; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table.data { border-collapse: collapse; width: 100%; font-size: var(--step--1); line-height: 1.55; }
+table.data th, table.data td { padding: 8px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+table.data tr:last-child td { border-bottom: 0; }
+table.data th { font-weight: 600; color: var(--ink-2); background: var(--chip); white-space: nowrap; }
+table.data td.num, table.data th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.data td.bad { color: var(--critical-ink); font-weight: 600; }
+table.data.kv td:first-child { white-space: nowrap; color: var(--ink-2); font-weight: 500; }
+table.data.mw-4 { min-width: 720px; }
+table.data.mw-5 { min-width: 840px; }
+table.data.mw-6 { min-width: 920px; }
+
+/* Evidence tags */
+.pill { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600;
+  padding: 1px 8px 1px 6px; border-radius: 999px; background: var(--chip); color: var(--good-ink); white-space: nowrap; }
+.pill.tag { padding: 0 7px; font-size: 0.72rem; line-height: 1.55; vertical-align: 0.06em; word-break: normal; }
+.pill.tag.m { color: var(--good-ink); }
+.pill.tag.e { color: var(--accent); }
+.pill.tag.l { color: var(--ink-2); }
+.pill.tag.u { color: var(--critical-ink); }
+
+/* Sources */
+details { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); min-width: 0; }
+details > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; }
+details > .inner { padding: 0 16px 16px; display: grid; gap: 16px; }
+.sources { display: grid; gap: 8px; }
+.count { margin-left: 4px; font-family: var(--font-mono); font-size: var(--step--1); font-weight: 500; color: var(--muted); }
+.urls { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.5; }
+.urls a { overflow-wrap: anywhere; word-break: normal; }
+footer { font-size: var(--step--1); color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
+
+pre { margin: 0; padding: 12px 14px; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: var(--step--1); }
+pre code { background: none; padding: 0; }
+.sec-head > p, .sub > p { max-width: 76ch; }
+del { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="page" lang="ko">
+<header>
+<div class="eyebrow">SQD 워크플로우 · 코드 변경점</div>
+<h1>emulator_steps.py: ibm_steps.py와 무엇이 다른가</h1>
+<p class="lede"><strong>대상:</strong> 이 번들을 처음 보는 사람, 또는 SQD를 워크플로우로 옮기는 사람. <strong>비교 대상:</strong> IBM 소규모 예제를 함수 4개로 나눈 <code>sqd_workflow/ibm_steps.py</code> + 실행기 <code>run_steps.py</code> 대 양자 에뮬레이터·고전 배치 병렬 예제 <code>sqd_workflow/emulator_steps.py</code> + 실행기 <code>run_example.py</code>. <strong>한 줄 요약:</strong> 함수 4개의 이름·순서·자료형 규약은 그대로 두고, (1) 분자를 수소 사슬로 바꾸고, (2) STEP 2가 OpenQASM도 내놓고, (3) STEP 3이 Qiskit 샘플러 대신 외부 에뮬레이터를 부르며, (4) STEP 4에 <code>mpi=True</code> 스위치를 더했다. STEP 4의 알고리즘 코드는 한 줄도 바꾸지 않았다(<code>ibm_steps.step4_postprocess</code>를 그대로 호출). kqdata01 로그인 노드에서 12큐비트로 네 가지 실행 경로를 검증했다.</p>
+</header>
+<div class="stats" role="list">
+<div class="stat" role="listitem"><span class="v">4<small>함수</small></span><span class="k">이름·순서·자료형 규약 유지 <a href="#s0">→</a></span></div>
+<div class="stat" role="listitem"><span class="v">0<small>줄</small></span><span class="k">STEP 4 알고리즘 변경 <a href="#s1">→</a></span></div>
+<div class="stat" role="listitem"><span class="v">1<small>외부 명령</small></span><span class="k">STEP 3 에뮬레이터(mpiexec) <a href="#s1">→</a></span></div>
+<div class="stat" role="listitem"><span class="v">4/4<small>경로</small></span><span class="k">kqdata01 12큐비트 검증 일치 <a href="#s3">→</a></span></div>
+</div>
+
+<nav class="toc" aria-labelledby="toc-title">
+<h2 class="toc-title" id="toc-title">목차</h2>
+<ol>
+<li><a class="top" href="#s0"><span class="no">1.</span>한눈에 보기</a></li>
+<li><a class="top" href="#s1"><span class="no">2.</span>단계별 변경 내용</a><span class="subs"><a href="#s1-1">STEP 1 <code>step1_map</code></a><a href="#s1-2">STEP 2 <code>step2_optimize</code></a><a href="#s1-3">STEP 3 <code>step3_execute</code></a><a href="#s1-4">STEP 4 <code>step4_postprocess</code></a><a href="#s1-5">자료형</a></span></li>
+<li><a class="top" href="#s2"><span class="no">3.</span>실행기: <code>run_steps.py</code> 대 <code>run_example.py</code></a></li>
+<li><a class="top" href="#s3"><span class="no">4.</span>kqdata01에서 한 검증</a></li>
+<li><a class="top" href="#s4"><span class="no">5.</span>워크플로우로 옮길 때 참고</a></li>
+</ol>
+</nav>
+<section class="sec" aria-labelledby="s0">
+<div class="sec-head">
+<h2 id="s0"><span class="no">1.</span> 한눈에 보기</h2>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col"></th><th scope="col"><code>ibm_steps.py</code> (IBM 원문)</th><th scope="col"><code>emulator_steps.py</code> (예제)</th></tr></thead>
+<tbody>
+<tr><td>분자</td><td>N₂, STO-6G, 대칭 D∞h, 코어 2궤도 동결, 16큐비트</td><td>수소 사슬 H_n(기본 14원자, 1.5 Å), STO-6G, 대칭 없음, 동결 없음, 2n큐비트(기본 28)</td></tr>
+<tr><td>STEP 1 출력</td><td><code>MappedProblem</code></td><td><strong>같은</strong> <code>MappedProblem</code></td></tr>
+<tr><td>STEP 2 출력</td><td><code>QuantumCircuit</code>(ISA)</td><td><code>OptimizedCircuit</code> = ISA 회로 + <strong>OpenQASM 2.0 문자열 + 측정 비트 대응표 + 게이트 수</strong></td></tr>
+<tr><td>STEP 3 샘플러</td><td>Qiskit <code>StatevectorSampler</code>, 10만 shot</td><td>외부 에뮬레이터 <code>mpi_counts_cli</code>(MPI 32 rank), 20만 shot. <code>sampler=&quot;statevector&quot;</code>로 원문 방식도 선택 가능</td></tr>
+<tr><td>STEP 3 출력</td><td><code>ExecutedCircuit</code></td><td><strong>같은</strong> <code>ExecutedCircuit</code> + 실행 기록 <code>EmulatorRun</code></td></tr>
+<tr><td>STEP 4</td><td><code>step4_postprocess(mapped, executed, wrap_solver, settings)</code></td><td><code>step4_postprocess(mapped, executed, mpi, settings)</code> → 안에서 원문 함수를 호출</td></tr>
+<tr><td>실행기</td><td><code>run_steps.py</code>: 인자 없이 1→4 순서 실행</td><td><code>run_example.py</code>: 같은 순서 + 명령행 인자, <code>--mpi</code>, <code>--save/--load</code>(작업 분리)</td></tr>
+<tr><td>외부 프로그램</td><td>없음</td><td>STEP 3의 에뮬레이터(별도 프로세스)</td></tr>
+<tr><td>바뀌지 않은 것</td><td></td><td>자료형 3개, STEP 4 알고리즘 전체, 난수 규약(<code>default_rng(seed)</code> 상태를 STEP 3이 넘기고 STEP 4가 복원)</td></tr>
+</tbody></table></div>
+</div>
+
+</section>
+<section class="sec" aria-labelledby="s1">
+<div class="sec-head">
+<h2 id="s1"><span class="no">2.</span> 단계별 변경 내용</h2>
+
+</div>
+<div class="sub">
+<h3 id="s1-1">STEP 1 <code>step1_map</code></h3>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">항목</th><th scope="col">원문</th><th scope="col">예제</th><th scope="col">이유</th></tr></thead>
+<tbody>
+<tr><td>서명</td><td><code>step1_map(*, compilation_seed=12345)</code></td><td><code>step1_map(*, n_atoms=14, spacing=1.5, basis=&quot;sto-6g&quot;, n_reps=2, compute_fci=True, compilation_seed=12345)</code></td><td>분자 크기를 인자로 바꿀 수 있게</td></tr>
+<tr><td>분자</td><td>N₂ 고정, <code>symmetry=&quot;Dooh&quot;</code>, <code>n_frozen=2</code></td><td><code>h_chain(n_atoms, spacing)</code>, <code>symmetry=False</code>, 동결 없음(활성 공간 = 전체 궤도)</td><td>반 채움 사슬은 분포가 넓어 고전 쪽 D를 키우기 쉽다(<a href="쉽게_읽는_SQD_고전계산.html">쉽게 읽는 설명</a>)</td></tr>
+<tr><td>FCI 기준값</td><td>항상 계산</td><td><code>compute_fci=False</code>면 생략(NaN)</td><td>궤도 18개 이상은 FCI가 무겁다</td></tr>
+<tr><td><code>mol.max_memory</code></td><td>기본(4 GB)</td><td>150,000 MB</td><td>FCI 차원 10⁷~10⁸에 기본값은 부족</td></tr>
+<tr><td>LUCJ 반복 수</td><td>4</td><td>2(인자)</td><td>측정 결과 2회가 샘플 다양성이 더 컸다</td></tr>
+<tr><td>pass manager·UCJ 연산자</td><td>원문 코드 인라인</td><td><code>scaled._pass_manager</code>, <code>scaled._ucj_operator</code> 호출</td><td>같은 내용을 <code>run_scaled.py</code>와 공유</td></tr>
+<tr><td>반환</td><td><code>MappedProblem</code></td><td>동일</td><td></td></tr>
+</tbody></table></div>
+<p>원문의 <code>print(&quot;norb=…&quot;)</code>류 출력은 한 줄로 합쳤다. 늘린 사슬(1.5 Å)에서는 CCSD가 "not converged"를 내지만 LUCJ 초기 진폭으로 그대로 쓴다(원문도 CCSD 수렴 여부를 확인하지 않는다).</p>
+</div>
+<div class="sub">
+<h3 id="s1-2">STEP 2 <code>step2_optimize</code></h3>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">항목</th><th scope="col">원문</th><th scope="col">예제</th></tr></thead>
+<tbody>
+<tr><td>하는 일</td><td><code>pass_manager.run(circuit)</code></td><td>같은 호출 + <code>scaled.to_emulator_qasm(isa)</code></td></tr>
+<tr><td>반환</td><td><code>QuantumCircuit</code></td><td><code>OptimizedCircuit(isa_circuit, qasm, measure_map, gate_counts)</code></td></tr>
+</tbody></table></div>
+<p>에뮬레이터는 Qiskit 회로 객체를 못 읽고 OpenQASM 2.0만 받으며, 지원 게이트가 <code>h x y z rx ry rz cx cz swap cp</code>뿐이라 ISA 회로(<code>xx_plus_yy</code>, <code>p</code> 포함)를 이 게이트들로 다시 transpile한다. <code>measure_map[c]</code>는 고전 비트 c가 측정하는 물리 큐비트로, STEP 3이 counts 문자열을 Qiskit 비트 순서로 되돌릴 때 쓴다. 파라미터는 <code>repr(float)</code>로 쓴다(에뮬레이터 파서가 <code>pi</code> 식을 못 읽음).</p>
+</div>
+<div class="sub">
+<h3 id="s1-3">STEP 3 <code>step3_execute</code></h3>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">항목</th><th scope="col">원문</th><th scope="col">예제</th></tr></thead>
+<tbody>
+<tr><td>서명</td><td><code>step3_execute(isa_circuit)</code></td><td><code>step3_execute(optimized, *, shots=200_000, n_ranks=32, seed=12345, sampler=&quot;emulator&quot;, emulator_cli, mpi_home, workdir=None)</code></td></tr>
+<tr><td>샘플러</td><td><code>StatevectorSampler(seed=rng)</code>, 10만 shot</td><td><code>mpiexec -launcher fork -np 32 mpi_counts_cli --qasm … --shots … --fuse all</code> 를 <code>subprocess.run</code>으로 실행, 표준출력의 counts JSON을 받음</td></tr>
+<tr><td>비트열 변환</td><td>없음(Qiskit이 <code>BitArray</code> 제공)</td><td><code>scaled.convert_emulator_counts(counts, measure_map, rng)</code> → bool 행렬 → <code>BitArray.from_bool_array</code></td></tr>
+<tr><td>난수</td><td><code>rng = default_rng(12345)</code>로 샘플링, 그 뒤 상태를 <code>ExecutedCircuit.rng_state</code>에 저장</td><td><code>rng = default_rng(seed)</code>를 만들어 <strong>샘플링 전 상태</strong>를 <code>rng_state</code>로 저장하고, 같은 seed를 에뮬레이터 <code>PLMPI_SEED</code>에도 준다</td></tr>
+<tr><td>반환</td><td><code>ExecutedCircuit(pub_result, rng_state)</code></td><td><code>(ExecutedCircuit, EmulatorRun)</code> — <code>EmulatorRun</code>은 cli·rank 수·shot·seed·벽시계·고유 비트열 수</td></tr>
+</tbody></table></div>
+<p>난수 규약의 차이에 주의: 원문은 StatevectorSampler가 rng를 소비한 <strong>뒤</strong>의 상태를 넘기지만, 에뮬레이터는 Python rng를 쓰지 않으므로 예제는 <code>default_rng(seed)</code> <strong>초기 상태</strong>를 넘긴다. 어느 쪽이든 STEP 4는 받은 상태에서 시작하므로 재현성은 같다. 다만 같은 seed라도 원문과 예제의 STEP 4 난수열은 다르다.</p>
+<p>에뮬레이터 실행 환경 처리:</p>
+<ul class="list"><li>바깥이 이미 MPI(srun) 안이어도 안쪽 MPI가 새로 뜨도록 <code>PMI_*</code>, <code>SLURM_STEP*</code>, <code>MPI_LOCAL*</code> 환경변수를 지운다.</li><li><code>-launcher fork</code>는 한 노드에서 프로세스를 fork로 띄우므로 Slurm 안팎에서 같은 명령이 돈다. rank 수는 2의 거듭제곱이어야 한다(아니면 결과가 조용히 틀린다. 코드에서 검사).</li><li>자식 프로세스는 <code>sched_setaffinity</code>로 코어 묶임을 풀어, srun이 rank 0을 코어 1개에 묶어도 에뮬레이터가 노드 코어를 모두 쓴다.</li><li>경로 기본값은 kqdata01 것이며 <code>SQD_EMULATOR_CLI</code>, <code>SQD_MPI_HOME</code> 환경변수로 바꾼다.</li><li><code>sampler=&quot;statevector&quot;</code>면 원문과 같은 Qiskit 샘플러를 써서 같은 자료형을 만든다(20큐비트 이하 검증용).</li></ul>
+</div>
+<div class="sub">
+<h3 id="s1-4">STEP 4 <code>step4_postprocess</code></h3>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">항목</th><th scope="col">원문</th><th scope="col">예제</th></tr></thead>
+<tbody>
+<tr><td>서명</td><td><code>(mapped, executed, *, wrap_solver=None, settings=None)</code></td><td><code>(mapped, executed, *, mpi=False, settings=None)</code></td></tr>
+<tr><td>본문</td><td>측정 통계, 구성 복구·대각화 반복, FCI 오차</td><td><strong>원문 함수를 그대로 호출</strong>. <code>mpi=True</code>면 <code>wrap_solver=lambda s: mpi_solver.batch_parallel(s, comm)</code>를 넘기고, 예외 시 전체 중단(<code>abort_on_error</code>)·SDK MPI 감지 확인(<code>check_sdk_mpi</code>)을 먼저 한다</td></tr>
+</tbody></table></div>
+<p>즉 예제의 STEP 4는 원문의 얇은 포장이다. 배치 병렬의 구현(<code>mpi_solver.batch_parallel</code>, 배치 k → rank k % size, 결과를 rank 0으로 gather)은 <a href="MPI_적용_결과.html">MPI 적용 결과</a>에 설명되어 있다.</p>
+</div>
+<div class="sub">
+<h3 id="s1-5">자료형</h3>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">자료형</th><th scope="col">출처</th><th scope="col">비고</th></tr></thead>
+<tbody>
+<tr><td><code>MappedProblem</code>, <code>ExecutedCircuit</code>, <code>PostprocessedResult</code></td><td><code>ibm_steps</code> 그대로 import</td><td>STEP 1·3·4 출력</td></tr>
+<tr><td><code>OptimizedCircuit</code></td><td>예제에서 추가</td><td>STEP 2 출력(에뮬레이터 입력 포함)</td></tr>
+<tr><td><code>EmulatorRun</code></td><td>예제에서 추가</td><td>STEP 3 실행 기록</td></tr>
+<tr><td><code>strip_for_transfer(mapped)</code></td><td>예제에서 추가</td><td>회로·pass manager를 뺀 <code>MappedProblem</code> 사본. pass manager는 pickle이 안 되므로 파일·broadcast로 넘길 때 사용</td></tr>
+</tbody></table></div>
+</div>
+</section>
+<section class="sec" aria-labelledby="s2">
+<div class="sec-head">
+<h2 id="s2"><span class="no">3.</span> 실행기: <code>run_steps.py</code> 대 <code>run_example.py</code></h2>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">항목</th><th scope="col"><code>run_steps.py</code></th><th scope="col"><code>run_example.py</code></th></tr></thead>
+<tbody>
+<tr><td>실행</td><td><code>python run_steps.py</code></td><td><code>python run_example.py [옵션]</code></td></tr>
+<tr><td>스레드</td><td>항상 1</td><td><code>--threads T</code></td></tr>
+<tr><td>문제 크기</td><td>고정</td><td><code>--n-atoms</code>, <code>--spacing</code>, <code>--n-reps</code>, <code>--no-fci</code>, <code>--shots</code>, <code>--ranks</code>(에뮬레이터), <code>--sampler</code>, <code>--seed</code>, <code>--set 이름=값</code>(STEP 4 설정; 기본 <code>num_batches=64 samples_per_batch=50000 max_dim=1000 max_iterations=3</code>)</td></tr>
+<tr><td>MPI</td><td>없음</td><td><code>--mpi</code>: rank 0이 STEP 1~3을 하고 <code>(strip_for_transfer(mapped), executed)</code>를 <code>comm.bcast</code>, 모든 rank가 STEP 4. rank 0 외 표준 출력은 끔</td></tr>
+<tr><td>작업 분리</td><td>없음</td><td><code>--only-prepare --save DIR</code>: STEP 1~3만 하고 저장(<code>step1_mapped.pkl</code>, <code>step2_circuit.qasm</code>, <code>step2_measure_map.json</code>, <code>step3_executed.pkl</code>, <code>step3_run.json</code>, <code>step13_timing.json</code>). <code>--load DIR</code>: 그 파일을 읽어 STEP 4만</td></tr>
+<tr><td>결과</td><td>반복 수·궤도 점유수 출력</td><td>위 출력 + JSON 요약(큐비트, FCI, SQD 에너지, 오차, 반복, D, 설정, 시간) → `step4_summary_&lt;S32</td></tr>
+<tr><td>MPI 환경 오검출</td><td>—</td><td><code>--mpi</code> 없이 rank 여러 개 환경이면 중단(SDK가 rank마다 전체 루프를 따로 도는 사고 방지)</td></tr>
+</tbody></table></div>
+<p>Slurm에서는 <code>slurm/example.sbatch</code>가 이 두 모드를 작업 하나 안에서 A(STEP 1~3, 1 task 32코어) → B(STEP 4, 32 rank) → C(STEP 4, 32스레드 비교) 세 단계로 돌린다. 워크플로우 엔진에서는 A를 작업 1개(또는 함수 3개), B를 MPI 작업 1개로 보면 된다.</p>
+</div>
+
+</section>
+<section class="sec" aria-labelledby="s3">
+<div class="sec-head">
+<h2 id="s3"><span class="no">4.</span> kqdata01에서 한 검증</h2>
+<p>로그인 노드(kqdata01)에서 H₆(12큐비트, 궤도 6·전자 3+3) 작은 문제로 네 경로를 돌렸다. 설정 <code>--shots 5000 --set num_batches=4 --set samples_per_batch=1000 --set max_dim=50 --set max_iterations=2</code>.</p>
+<div class="tbl-wrap"><table class="data">
+<thead><tr><th scope="col">경로</th><th scope="col">명령</th><th scope="col">SQD 에너지 (Ha)</th><th scope="col">비고</th></tr></thead>
+<tbody>
+<tr><td>단일 프로세스, Qiskit 샘플러</td><td><code>python run_example.py --sampler statevector …</code></td><td>−2.951098</td><td>원문 방식</td></tr>
+<tr><td>단일 프로세스, 에뮬레이터 2 rank</td><td><code>python run_example.py --sampler emulator --ranks 2 …</code></td><td>−2.951098</td><td>에뮬레이터 0.2초, 고유 비트열 83</td></tr>
+<tr><td>MPI 2 rank, Qiskit 샘플러</td><td><code>mpiexec -launcher fork -n 2 python run_example.py --mpi …</code></td><td>−2.951098</td><td>STEP 1~3 broadcast 경로</td></tr>
+<tr><td>저장 후 재적재, MPI 2 rank</td><td><code>--only-prepare --save D</code> 뒤 <code>mpiexec … --mpi --load D</code></td><td>−2.951098</td><td>작업 분리 경로</td></tr>
+</tbody></table></div>
+<p>FCI는 −3.020198 Ha(오차 69 mHa는 D=144로 작은 부분공간 탓). 네 경로의 에너지가 같은 것은 이 크기에서 부분공간이 포화되어 같은 표를 풀기 때문이며, 경로 간 자료형·난수 규약이 어긋나지 않았음을 뜻한다.</p>
+<p>28큐비트 실제 크기(H₁₄, 에뮬레이터 32 rank, D=10⁶ 배치 64 반복 3)는 <code>slurm/example.sbatch</code>로 kqsvr04에 제출했다(작업 3295). 결과는 <a href="H16_MPI_확장성.html">H₁₆ MPI 확장성</a>의 예제 절에 기록한다.</p>
+</div>
+
+</section>
+<section class="sec" aria-labelledby="s4">
+<div class="sec-head">
+<h2 id="s4"><span class="no">5.</span> 워크플로우로 옮길 때 참고</h2>
+<ul class="list"><li>작업 경계는 함수 경계와 같다. 함수 사이 값은 모두 pickle 가능(<code>strip_for_transfer</code> 적용 후)하므로 파일이나 객체 저장소 어느 쪽으로도 넘길 수 있다.</li><li>STEP 3만 외부 명령을 부른다. 다른 에뮬레이터나 실제 QPU로 바꾸려면 "OpenQASM 입력 → counts 출력" 명령과 <code>convert_emulator_counts</code>만 갈아 끼우면 된다.</li><li>STEP 4의 MPI는 "같은 스크립트를 rank 수만큼 띄우고 모두가 <code>step4_postprocess(mpi=True)</code>를 부른다"는 SPMD 규약이다. 입력은 모든 rank에서 같아야 하므로 rank 0이 읽어 broadcast하거나 모든 rank가 같은 파일을 읽는다.</li><li>자원 요구: STEP 1은 FCI 때문에 코어 여러 개(32코어 H₁₄ 1분, H₁₆ 22분), STEP 3은 노드 코어 전부(에뮬레이터), STEP 4는 rank당 메모리(D=10⁶ 0.3 GB, 10⁷ 3 GB, 10⁸ 30 GB).</li></ul>
+</div>
+
+</section>
+<footer><span>원본: <code>../sqd_workflow_bundle/docs/emulator_steps_변경점.md</code> · HTML 생성 2026-10-13 17:17 (sqdperf.report.md2html)</span></footer>
+</div>
+</body>
+</html>
