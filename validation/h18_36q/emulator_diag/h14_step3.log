@@ -1,0 +1,10 @@
+STEP 3 | n2_sto6g_16q  | job 3094 | nodes kqsvr[04-06] | 2026-10-09T00:46:21+09:00
+에뮬레이터 /data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli | np 64 | shots 100000 | fuse all | seed 12345
+kqsvr04:22
+kqsvr05:21
+kqsvr06:21
+[lightning-mpi] note: processes per node is not a power of two (balanced distribution mode).
+에뮬레이터 wall 48.957962443 s
+[STEP 3] n2_sto6g_16q workdir=/data01/hpcuser/sqd/workflow/runs/diag_h14_emu3node/work
+[STEP 3] 완료
+끝 2026-10-09T00:47:11+09:00

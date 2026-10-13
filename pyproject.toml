@@ -20,6 +20,8 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest==8.4.2"]
 docs = ["Markdown==3.8.2"]
+# STEP 4 MPI 배치 병렬. 사이트 MPI로 소스 빌드: MPICC=<mpi>/bin/mpicc, uv의 --no-binary-package mpi4py
+mpi = ["mpi4py==4.1.2"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -27,4 +29,7 @@ include = ["sqd_workflow*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["reference: official N2 reproduction"]
+markers = [
+  "reference: official N2 reproduction",
+  "mpi: STEP 4 MPI run (needs mpi4py and mpiexec or SQD_MPIEXEC)",
+]

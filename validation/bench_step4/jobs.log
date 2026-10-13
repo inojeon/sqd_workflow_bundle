@@ -1,0 +1,143 @@
+===== wfb-2node-3010.out
+bench job 3010 | nodes kqsvr[04-05] | cases [n2_d1e6:max_dim=1000;samples_per_batch=10000 n2_d4e6:max_dim=2000;samples_per_batch=10000] | configs [M:3:10 M:3:16] | rounds 1 | hint nomultithread | 2026-10-08T13:10:02+09:00
+probe -n1 -c1 hint=nomultithread:
+  task 0 0
+probe -n3 -c1 hint=nomultithread:
+  task 0 0
+  task 1 1
+  task 2 2
+probe -n3 -c10 hint=nomultithread:
+  task 0 0,2,4,6,8,10,12,14,16,18
+  task 1 1,3,5,7,9,11,13,15,17,19
+  task 2 20-28,30
+13:10:59 n2_d1e6 M:3:16 r1 nodes=2 wall=56.212978837s exit=0
+13:11:58 n2_d1e6 M:3:10 r1 nodes=2 wall=59.634888170s exit=0
+13:13:37 n2_d4e6 M:3:16 r1 nodes=2 wall=98.608785440s exit=0
+13:15:30 n2_d4e6 M:3:10 r1 nodes=2 wall=112.738410107s exit=0
+끝 2026-10-08T13:15:30+09:00
+===== wfb-core-3008.out
+bench job 3008 | nodes kqsvr04 | cases [n2_d1e5:max_dim=316;samples_per_batch=10000 n2_d1e6:max_dim=1000;samples_per_batch=10000] | configs [S:1 S:3 S:10 S:30 M:3:1 M:3:10] | rounds 2 | hint nomultithread | 2026-10-08T12:20:39+09:00
+probe -n1 -c1 hint=nomultithread:
+  task 0 0
+probe -n3 -c1 hint=nomultithread:
+  task 0 0
+  task 1 1
+  task 2 2
+probe -n3 -c10 hint=nomultithread:
+  task 0 0,2,4,6,8,10,12,14,16,18
+  task 1 1,3,5,7,9,11,13,15,17,19
+  task 2 20-28,30
+12:21:38 n2_d1e5 S:3 r1 nodes=1 wall=58.662444204s exit=0
+12:22:35 n2_d1e5 M:3:1 r1 nodes=1 wall=57.549111226s exit=0
+12:23:18 n2_d1e5 S:30 r1 nodes=1 wall=43.043253999s exit=0
+12:23:59 n2_d1e5 M:3:10 r1 nodes=1 wall=40.433896720s exit=0
+12:25:36 n2_d1e5 S:1 r1 nodes=1 wall=97.474188015s exit=0
+12:26:22 n2_d1e5 S:10 r1 nodes=1 wall=45.613455254s exit=0
+12:27:07 n2_d1e5 S:10 r2 nodes=1 wall=45.362229117s exit=0
+12:28:05 n2_d1e5 M:3:1 r2 nodes=1 wall=57.651458084s exit=0
+12:28:48 n2_d1e5 S:30 r2 nodes=1 wall=43.025792495s exit=0
+12:29:28 n2_d1e5 M:3:10 r2 nodes=1 wall=40.355373976s exit=0
+12:30:27 n2_d1e5 S:3 r2 nodes=1 wall=58.714289799s exit=0
+12:32:05 n2_d1e5 S:1 r2 nodes=1 wall=98.086153875s exit=0
+12:35:28 n2_d1e6 S:3 r1 nodes=1 wall=203.498884085s exit=0
+12:38:40 n2_d1e6 M:3:1 r1 nodes=1 wall=191.716366669s exit=0
+12:40:01 n2_d1e6 S:30 r1 nodes=1 wall=80.554748928s exit=0
+12:41:10 n2_d1e6 M:3:10 r1 nodes=1 wall=69.512632117s exit=0
+12:49:21 n2_d1e6 S:1 r1 nodes=1 wall=490.927206631s exit=0
+12:51:06 n2_d1e6 S:10 r1 nodes=1 wall=104.438599386s exit=0
+12:52:50 n2_d1e6 S:10 r2 nodes=1 wall=104.319358125s exit=0
+12:56:01 n2_d1e6 M:3:1 r2 nodes=1 wall=191.270268256s exit=0
+12:57:22 n2_d1e6 S:30 r2 nodes=1 wall=80.521868669s exit=0
+12:58:27 n2_d1e6 M:3:10 r2 nodes=1 wall=65.328421068s exit=0
+13:01:49 n2_d1e6 S:3 r2 nodes=1 wall=202.110499357s exit=0
+13:10:02 n2_d1e6 S:1 r2 nodes=1 wall=492.891231683s exit=0
+끝 2026-10-08T13:10:02+09:00
+===== wfb-core4e6-3009.out
+bench job 3009 | nodes kqsvr05 | cases [n2_d4e6:max_dim=2000;samples_per_batch=10000] | configs [S:10 S:30 M:3:10] | rounds 1 | hint nomultithread | 2026-10-08T12:19:06+09:00
+probe -n1 -c1 hint=nomultithread:
+  task 0 0
+probe -n3 -c1 hint=nomultithread:
+  task 0 0
+  task 1 1
+  task 2 2
+probe -n3 -c10 hint=nomultithread:
+  task 0 0,2,4,6,8,10,12,14,16,18
+  task 1 1,3,5,7,9,11,13,15,17,19
+  task 2 20-28,30
+12:22:04 n2_d4e6 S:30 r1 nodes=1 wall=178.342572710s exit=0
+12:26:20 n2_d4e6 S:10 r1 nodes=1 wall=255.787571757s exit=0
+12:28:25 n2_d4e6 M:3:10 r1 nodes=1 wall=124.883877813s exit=0
+끝 2026-10-08T12:28:25+09:00
+===== wfb-d1e5-2998.out
+bench job 2998 | nodes kqsvr04 | cases [n2_d1e5:max_dim=316;samples_per_batch=10000] | configs [S:1 S:10 S:30 M:3:1 M:3:10 M:3:20] | rounds 3 | 2026-10-08T11:22:52+09:00
+11:23:43 n2_d1e5 S:10 r1 nodes=1 wall=51.054332914s exit=0
+11:24:26 n2_d1e5 M:3:10 r1 nodes=1 wall=42.334058517s exit=0
+11:25:43 n2_d1e5 M:3:1 r1 nodes=1 wall=76.986619588s exit=0
+11:26:24 n2_d1e5 M:3:20 r1 nodes=1 wall=41.407977710s exit=0
+11:28:03 n2_d1e5 S:1 r1 nodes=1 wall=99.207192170s exit=0
+11:28:50 n2_d1e5 S:30 r1 nodes=1 wall=46.511879396s exit=0
+11:29:36 n2_d1e5 S:30 r2 nodes=1 wall=46.349973084s exit=0
+11:30:18 n2_d1e5 M:3:10 r2 nodes=1 wall=42.009447990s exit=0
+11:31:35 n2_d1e5 M:3:1 r2 nodes=1 wall=77.028413402s exit=0
+11:32:16 n2_d1e5 M:3:20 r2 nodes=1 wall=41.383470204s exit=0
+11:33:07 n2_d1e5 S:10 r2 nodes=1 wall=50.494541572s exit=0
+11:34:45 n2_d1e5 S:1 r2 nodes=1 wall=97.898426647s exit=0
+11:36:02 n2_d1e5 M:3:1 r3 nodes=1 wall=77.419358754s exit=0
+11:36:45 n2_d1e5 M:3:10 r3 nodes=1 wall=42.494459041s exit=0
+11:38:23 n2_d1e5 S:1 r3 nodes=1 wall=97.732290490s exit=0
+11:39:04 n2_d1e5 M:3:20 r3 nodes=1 wall=41.511218059s exit=0
+11:39:55 n2_d1e5 S:10 r3 nodes=1 wall=51.192988703s exit=0
+11:40:41 n2_d1e5 S:30 r3 nodes=1 wall=46.192796137s exit=0
+끝 2026-10-08T11:40:41+09:00
+===== wfb-d1e6-2999.out
+bench job 2999 | nodes kqsvr04 | cases [n2_d1e6:max_dim=1000;samples_per_batch=10000] | configs [S:1 S:10 S:30 M:3:1 M:3:10 M:3:20] | rounds 2 | 2026-10-08T11:40:42+09:00
+11:43:03 n2_d1e6 S:10 r1 nodes=1 wall=141.565674256s exit=0
+11:44:19 n2_d1e6 M:3:10 r1 nodes=1 wall=75.966545019s exit=0
+11:49:44 n2_d1e6 M:3:1 r1 nodes=1 wall=325.198461712s exit=0
+11:50:49 n2_d1e6 M:3:20 r1 nodes=1 wall=64.965387682s exit=0
+11:59:01 n2_d1e6 S:1 r1 nodes=1 wall=491.269815171s exit=0
+12:00:35 n2_d1e6 S:30 r1 nodes=1 wall=94.599941615s exit=0
+12:02:11 n2_d1e6 S:30 r2 nodes=1 wall=95.794588726s exit=0
+12:03:29 n2_d1e6 M:3:10 r2 nodes=1 wall=77.840401610s exit=0
+12:08:54 n2_d1e6 M:3:1 r2 nodes=1 wall=325.299729147s exit=0
+12:10:03 n2_d1e6 M:3:20 r2 nodes=1 wall=68.999972715s exit=0
+12:12:27 n2_d1e6 S:10 r2 nodes=1 wall=143.601325066s exit=0
+12:20:38 n2_d1e6 S:1 r2 nodes=1 wall=491.588733116s exit=0
+끝 2026-10-08T12:20:38+09:00
+===== wfb-d4e6-3000.out
+bench job 3000 | nodes kqsvr05 | cases [n2_d4e6:max_dim=2000;samples_per_batch=10000] | configs [S:1 S:10 S:30 M:3:1 M:3:10 M:3:20] | rounds 1 | 2026-10-08T11:22:03+09:00
+11:28:24 n2_d4e6 S:10 r1 nodes=1 wall=380.997193211s exit=0
+11:31:07 n2_d4e6 M:3:10 r1 nodes=1 wall=163.331796148s exit=0
+11:47:37 n2_d4e6 M:3:1 r1 nodes=1 wall=989.637980788s exit=0
+11:49:42 n2_d4e6 M:3:20 r1 nodes=1 wall=125.401844745s exit=0
+12:15:18 n2_d4e6 S:1 r1 nodes=1 wall=1535.856519704s exit=0
+12:19:05 n2_d4e6 S:30 r1 nodes=1 wall=227.160490706s exit=0
+끝 2026-10-08T12:19:05+09:00
+===== wfb-ibm-2997.out
+bench job 2997 | nodes kqsvr04 | cases [ibm:] | configs [S:1 S:3 M:1:1 M:2:1 M:3:1] | rounds 5 | 2026-10-08T11:22:03+09:00
+11:22:05 ibm M:3:1 r1 nodes=1 wall=2.382701747s exit=0
+11:22:07 ibm M:1:1 r1 nodes=1 wall=1.687525411s exit=0
+11:22:08 ibm S:1 r1 nodes=1 wall=1.456699511s exit=0
+11:22:11 ibm M:2:1 r1 nodes=1 wall=2.722468578s exit=0
+11:22:12 ibm S:3 r1 nodes=1 wall=1.529422232s exit=0
+11:22:14 ibm S:1 r2 nodes=1 wall=1.479914752s exit=0
+11:22:17 ibm M:2:1 r2 nodes=1 wall=2.688830442s exit=0
+11:22:19 ibm M:3:1 r2 nodes=1 wall=2.333519136s exit=0
+11:22:20 ibm S:3 r2 nodes=1 wall=1.536040645s exit=0
+11:22:22 ibm M:1:1 r2 nodes=1 wall=1.687356329s exit=0
+11:22:24 ibm S:3 r3 nodes=1 wall=1.520244057s exit=0
+11:22:26 ibm M:2:1 r3 nodes=1 wall=2.642687167s exit=0
+11:22:29 ibm M:3:1 r3 nodes=1 wall=2.329007103s exit=0
+11:22:30 ibm S:1 r3 nodes=1 wall=1.474777038s exit=0
+11:22:32 ibm M:1:1 r3 nodes=1 wall=1.733513834s exit=0
+11:22:34 ibm M:1:1 r4 nodes=1 wall=1.664444586s exit=0
+11:22:36 ibm M:2:1 r4 nodes=1 wall=2.664491629s exit=0
+11:22:39 ibm M:3:1 r4 nodes=1 wall=2.327469887s exit=0
+11:22:40 ibm S:3 r4 nodes=1 wall=1.514765170s exit=0
+11:22:42 ibm S:1 r4 nodes=1 wall=1.520743243s exit=0
+11:22:44 ibm M:2:1 r5 nodes=1 wall=2.781740623s exit=0
+11:22:46 ibm S:1 r5 nodes=1 wall=1.542426204s exit=0
+11:22:48 ibm M:3:1 r5 nodes=1 wall=2.330929637s exit=0
+11:22:50 ibm S:3 r5 nodes=1 wall=1.489591067s exit=0
+11:22:51 ibm M:1:1 r5 nodes=1 wall=1.745599721s exit=0
+끝 2026-10-08T11:22:51+09:00

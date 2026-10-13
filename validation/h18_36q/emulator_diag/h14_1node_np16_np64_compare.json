@@ -1,0 +1,74 @@
+{
+  "/tmp/claude-1001/-home-kq-Workspace-SQD-bench/5a8bf7d1-dce8-4a9c-b5ba-8a6348e908b3/scratchpad/h14_np16": {
+    "qubits": 28,
+    "fci_dimension": 11778624,
+    "norm": 1.0000000000000573,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 54264,
+      "xeb_ratio": 1.0087432766965965,
+      "top200_chi2": 223.89318122652583,
+      "top200_pvalue": 0.11837095257662976,
+      "top200_exact_mass": 0.15582613595186362
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 54263,
+      "xeb_ratio": 0.9946708607403493,
+      "top200_chi2": 250.51574540048085,
+      "top200_pvalue": 0.008833301513237768,
+      "top200_exact_mass": 0.15582613595186362
+    }
+  },
+  "/tmp/claude-1001/-home-kq-Workspace-SQD-bench/5a8bf7d1-dce8-4a9c-b5ba-8a6348e908b3/scratchpad/h14_np64": {
+    "qubits": 28,
+    "fci_dimension": 11778624,
+    "norm": 1.0000000000000573,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 54250,
+      "xeb_ratio": 1.0012204617028906,
+      "top200_chi2": 194.54124774289548,
+      "top200_pvalue": 0.5956267238287863,
+      "top200_exact_mass": 0.15582613595186362
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 54263,
+      "xeb_ratio": 0.9946708607403493,
+      "top200_chi2": 250.51574540048085,
+      "top200_pvalue": 0.008833301513237768,
+      "top200_exact_mass": 0.15582613595186362
+    }
+  },
+  "/tmp/claude-1001/-home-kq-Workspace-SQD-bench/5a8bf7d1-dce8-4a9c-b5ba-8a6348e908b3/scratchpad/h14_ffsim": {
+    "qubits": 28,
+    "fci_dimension": 11778624,
+    "norm": 1.0000000000000573,
+    "sampler": "ffsim",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 54300,
+      "xeb_ratio": 1.0046233402518197,
+      "top200_chi2": 201.80029618815323,
+      "top200_pvalue": 0.4510287860349423,
+      "top200_exact_mass": 0.15582613595186362
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 54263,
+      "xeb_ratio": 0.9946708607403493,
+      "top200_chi2": 250.51574540048085,
+      "top200_pvalue": 0.008833301513237768,
+      "top200_exact_mass": 0.15582613595186362
+    }
+  }
+}

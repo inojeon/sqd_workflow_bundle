@@ -1,0 +1,300 @@
+[
+  {
+    "run_id": "sc_n2_ccpvdz_36q_norb14_20261008-135333_1663470",
+    "qubits": 28,
+    "norb": 14,
+    "nelec": [
+      5,
+      5
+    ],
+    "fci_dimension": 4008004,
+    "rhf": -108.92983838560949,
+    "ccsd": -109.06829563414064,
+    "fci": NaN,
+    "step1_timing": {
+      "ccsd_seconds": 0.04944828152656555
+    },
+    "emulator_gates": 2174,
+    "emulator_gate_counts": {
+      "ry": 1044,
+      "rz": 546,
+      "cx": 544,
+      "cp": 40,
+      "measure": 28,
+      "barrier": 1
+    },
+    "isa_depth": 33,
+    "emulator": {
+      "cli": "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli",
+      "np": 64,
+      "nodes": "kqsvr[04-06]",
+      "hostfile": [
+        "kqsvr04:22",
+        "kqsvr05:21",
+        "kqsvr06:21"
+      ],
+      "shots": 100000,
+      "fuse": "all",
+      "seed": 12345,
+      "wall_seconds": 28.135698318481445,
+      "slurm_job": "3045"
+    },
+    "emulator_maxrss_per_node": "2267152K",
+    "step3_unique": 1643,
+    "step4_ibm": {
+      "energy": -109.04331060394537,
+      "iterations": 2,
+      "max_D": 2500,
+      "mpi": 3,
+      "seconds": 0.8291197121143341
+    },
+    "slurm": {
+      "step1": {
+        "job": "3043",
+        "sacct": "00:00:05|COMPLETED|kqsvr04"
+      },
+      "step2": {
+        "job": "3044",
+        "sacct": "00:00:03|COMPLETED|kqsvr05"
+      },
+      "step3": {
+        "job": "3045",
+        "sacct": "00:00:31|COMPLETED|kqsvr[04-06]"
+      },
+      "step4": {
+        "job": "3046",
+        "sacct": "00:00:04|COMPLETED|kqsvr04"
+      }
+    }
+  },
+  {
+    "run_id": "sc_n2_ccpvdz_36q_norb16_20261008-135333_1663586",
+    "qubits": 32,
+    "norb": 16,
+    "nelec": [
+      5,
+      5
+    ],
+    "fci_dimension": 19079424,
+    "rhf": -108.9298383856094,
+    "ccsd": -109.10903645229648,
+    "fci": NaN,
+    "step1_timing": {
+      "ccsd_seconds": 0.05776949226856232
+    },
+    "emulator_gates": 2794,
+    "emulator_gate_counts": {
+      "ry": 1348,
+      "rz": 700,
+      "cx": 700,
+      "cp": 46,
+      "measure": 32,
+      "barrier": 1
+    },
+    "isa_depth": 37,
+    "emulator": {
+      "cli": "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli",
+      "np": 64,
+      "nodes": "kqsvr[04-06]",
+      "hostfile": [
+        "kqsvr04:22",
+        "kqsvr05:21",
+        "kqsvr06:21"
+      ],
+      "shots": 100000,
+      "fuse": "all",
+      "seed": 12345,
+      "wall_seconds": 502.56959319114685,
+      "slurm_job": "3049"
+    },
+    "emulator_maxrss_per_node": "24032848K",
+    "step3_unique": 1657,
+    "step4_ibm": {
+      "energy": -109.07235257639775,
+      "iterations": 2,
+      "max_D": 2500,
+      "mpi": 3,
+      "seconds": 0.9446378946304321
+    },
+    "slurm": {
+      "step1": {
+        "job": "3047",
+        "sacct": "00:00:08|COMPLETED|kqsvr04"
+      },
+      "step2": {
+        "job": "3048",
+        "sacct": "00:00:03|COMPLETED|kqsvr05"
+      },
+      "step3": {
+        "job": "3049",
+        "sacct": "00:08:26|COMPLETED|kqsvr[04-06]"
+      },
+      "step4": {
+        "job": "3050",
+        "sacct": "00:00:04|COMPLETED|kqsvr04"
+      }
+    }
+  },
+  {
+    "run_id": "sc_n2_ccpvdz_36q_norb17_20261008-135333_1663683",
+    "qubits": 34,
+    "norb": 17,
+    "nelec": [
+      5,
+      5
+    ],
+    "fci_dimension": 38291344,
+    "rhf": -108.92983838560943,
+    "ccsd": -109.12390530842804,
+    "fci": NaN,
+    "step1_timing": {
+      "ccsd_seconds": 0.05041906237602234
+    },
+    "emulator_gates": 3127,
+    "emulator_gate_counts": {
+      "ry": 1512,
+      "cx": 784,
+      "rz": 782,
+      "cp": 49,
+      "measure": 34,
+      "barrier": 1
+    },
+    "isa_depth": 39,
+    "emulator": {
+      "cli": "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli",
+      "np": 64,
+      "nodes": "kqsvr[04-06]",
+      "hostfile": [
+        "kqsvr04:22",
+        "kqsvr05:21",
+        "kqsvr06:21"
+      ],
+      "shots": 100000,
+      "fuse": "all",
+      "seed": 12345,
+      "wall_seconds": 2379.3599936962128,
+      "slurm_job": "3053"
+    },
+    "emulator_maxrss_per_node": "93408228K",
+    "step3_unique": 862,
+    "step4_ibm": {
+      "energy": -109.07244257659515,
+      "iterations": 2,
+      "max_D": 2500,
+      "mpi": 3,
+      "seconds": 0.9431906193494797
+    },
+    "slurm": {
+      "step1": {
+        "job": "3051",
+        "sacct": "00:00:06|COMPLETED|kqsvr04"
+      },
+      "step2": {
+        "job": "3052",
+        "sacct": "00:00:03|COMPLETED|kqsvr06"
+      },
+      "step3": {
+        "job": "3053",
+        "sacct": "00:39:42|COMPLETED|kqsvr[04-06]"
+      },
+      "step4": {
+        "job": "3054",
+        "sacct": "00:00:04|COMPLETED|kqsvr04"
+      }
+    }
+  },
+  {
+    "run_id": "sc_n2_ccpvdz_36q_20261008-144309_1712586",
+    "qubits": 36,
+    "norb": 18,
+    "nelec": [
+      5,
+      5
+    ],
+    "fci_dimension": 73410624,
+    "rhf": -108.92983838560932,
+    "ccsd": -109.14243697652564,
+    "fci": -109.14826508490894,
+    "step1_timing": {
+      "fci_seconds": 41.384039618074894,
+      "ccsd_seconds": 0.199911467730999
+    },
+    "emulator_gates": 3478,
+    "emulator_gate_counts": {
+      "ry": 1684,
+      "cx": 872,
+      "rz": 870,
+      "cp": 52,
+      "measure": 36,
+      "barrier": 1
+    },
+    "isa_depth": 41,
+    "emulator": {
+      "cli": "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli",
+      "np": 64,
+      "nodes": "kqsvr[04-06]",
+      "hostfile": [
+        "kqsvr04:22",
+        "kqsvr05:21",
+        "kqsvr06:21"
+      ],
+      "shots": 100000,
+      "fuse": "all",
+      "seed": 12345,
+      "wall_seconds": 9582.254731416702,
+      "slurm_job": "3058"
+    },
+    "emulator_maxrss_per_node": "370816356K",
+    "step3_unique": 2203,
+    "step4_ibm": {
+      "energy": -109.0808446118198,
+      "iterations": 2,
+      "max_D": 2500,
+      "mpi": 3,
+      "seconds": 1.1602731496095657
+    },
+    "slurm": {
+      "step1": {
+        "job": "3056",
+        "sacct": "00:00:50|COMPLETED|kqsvr04"
+      },
+      "step2": {
+        "job": "3057",
+        "sacct": "00:00:03|COMPLETED|kqsvr04"
+      },
+      "step3": {
+        "job": "3058",
+        "sacct": "02:39:45|COMPLETED|kqsvr[04-06]"
+      },
+      "step4": {
+        "job": "3059",
+        "sacct": "00:00:04|COMPLETED|kqsvr04"
+      }
+    },
+    "step4_maxdim1000": {
+      "energy": -109.1380466166132,
+      "error": 0.01021846829574713,
+      "iterations": 2,
+      "D": [
+        [
+          213444,
+          213444,
+          213444
+        ],
+        [
+          213444,
+          213444,
+          213444
+        ]
+      ],
+      "mpi": 3,
+      "seconds": 9.068654417991638,
+      "solve_seconds": 8.337988123297691,
+      "settings": {
+        "max_dim": 1000,
+        "samples_per_batch": 10000
+      },
+      "job": "3066"
+    }
+  }
+]

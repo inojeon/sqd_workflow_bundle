@@ -1,0 +1,162 @@
+{
+  "date": "2026-10-08",
+  "environment": {
+    "python": "3.11.17",
+    "platform": "Linux-4.18.0-553.el8_10.x86_64-x86_64-with-glibc2.28",
+    "packages": {
+      "qiskit": "2.5.2",
+      "qiskit-addon-sqd": "0.13.1",
+      "ffsim": "0.0.84",
+      "pyscf": "2.14.0",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "mpi4py": "4.1.2"
+    }
+  },
+  "mpi": "MPICH 4.2.0, srun --mpi=pmi2, FI_PROVIDER=verbs;ofi_rxm",
+  "runs": [
+    {
+      "run_id": "wf_20261008-105603",
+      "config": "1노드, 3 rank × 1 스레드",
+      "jobs": [
+        {
+          "job": "2982",
+          "name": "wf-step1",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:09",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2983",
+          "name": "wf-step2",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:03",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2984",
+          "name": "wf-step3",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:03",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2985",
+          "name": "wf-step4",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:04",
+          "nodes": "kqsvr04"
+        }
+      ],
+      "step4_mpi_size": 3,
+      "step4_mpi_hosts": null,
+      "step4_elapsed_seconds": 0.636,
+      "total_energy_hartree": -108.59592219311702,
+      "energy_error_hartree": 6.515786900251896e-05,
+      "n_iterations": 2,
+      "bit_identical_to_first_run": true
+    },
+    {
+      "run_id": "wf_20261008-105648",
+      "config": "2노드, 3 rank × 2 스레드",
+      "jobs": [
+        {
+          "job": "2986",
+          "name": "wf-step1",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:05",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2987",
+          "name": "wf-step2",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:03",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2988",
+          "name": "wf-step3",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:03",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2989",
+          "name": "wf-step4",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:04",
+          "nodes": "kqsvr[04-05]"
+        }
+      ],
+      "step4_mpi_size": 3,
+      "step4_mpi_hosts": [
+        "kqsvr04",
+        "kqsvr04",
+        "kqsvr05"
+      ],
+      "step4_elapsed_seconds": 0.422,
+      "total_energy_hartree": -108.59592219311702,
+      "energy_error_hartree": 6.515786900251896e-05,
+      "n_iterations": 2,
+      "bit_identical_to_first_run": false
+    },
+    {
+      "run_id": "wf_20261008-105720",
+      "config": "2노드, 3 rank × 1 스레드",
+      "jobs": [
+        {
+          "job": "2990",
+          "name": "wf-step1",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:05",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2991",
+          "name": "wf-step2",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:03",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2992",
+          "name": "wf-step3",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:03",
+          "nodes": "kqsvr04"
+        },
+        {
+          "job": "2993",
+          "name": "wf-step4",
+          "state": "COMPLETED",
+          "exit": "0:0",
+          "elapsed": "00:00:04",
+          "nodes": "kqsvr[04-05]"
+        }
+      ],
+      "step4_mpi_size": 3,
+      "step4_mpi_hosts": [
+        "kqsvr04",
+        "kqsvr04",
+        "kqsvr05"
+      ],
+      "step4_elapsed_seconds": 0.702,
+      "total_energy_hartree": -108.59592219311702,
+      "energy_error_hartree": 6.515786900251896e-05,
+      "n_iterations": 2,
+      "bit_identical_to_first_run": true
+    }
+  ]
+}

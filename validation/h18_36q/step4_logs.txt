@@ -1,0 +1,84 @@
+STEP 4 | h18_sto6g_36q  | job 3074 | nodes kqsvr04 | 2026-10-08T18:17:20+09:00
+[STEP 4] workdir=/data01/hpcuser/sqd/workflow/runs/sc_h18_sto6g_36q_20261008-180057_2339410_step4_d1e6/work
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.034399336436763406
+Iteration 1
+	Subsample 0
+		Energy: -9.647521747719082
+		Subspace dimension: 1000000
+	Subsample 1
+		Energy: -9.64752174771909
+		Subspace dimension: 1000000
+	Subsample 2
+		Energy: -9.647521747719082
+		Subspace dimension: 1000000
+Iteration 2
+	Subsample 0
+		Energy: -9.64752174771909
+		Subspace dimension: 1000000
+	Subsample 1
+		Energy: -9.647521747719082
+		Subspace dimension: 1000000
+	Subsample 2
+		Energy: -9.647521747719082
+		Subspace dimension: 1000000
+Final energy: -9.64752174771909
+Final energy error: nan
+[STEP 4] 완료
+끝 2026-10-08T18:20:22+09:00
+STEP 4 | h18_sto6g_36q  | job 3075 | nodes kqsvr05 | 2026-10-08T18:17:22+09:00
+[STEP 4] workdir=/data01/hpcuser/sqd/workflow/runs/sc_h18_sto6g_36q_20261008-180057_2339410_step4_d1e7/work
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.034399336436763406
+Iteration 1
+	Subsample 0
+		Energy: -9.709126017057606
+		Subspace dimension: 9998244
+	Subsample 1
+		Energy: -9.70912601705762
+		Subspace dimension: 9998244
+	Subsample 2
+		Energy: -9.70912601705762
+		Subspace dimension: 9998244
+Iteration 2
+	Subsample 0
+		Energy: -9.709126017057628
+		Subspace dimension: 9998244
+	Subsample 1
+		Energy: -9.709126017057613
+		Subspace dimension: 9998244
+	Subsample 2
+		Energy: -9.709126017057606
+		Subspace dimension: 9998244
+Final energy: -9.709126017057628
+Final energy error: nan
+[STEP 4] 완료
+끝 2026-10-08T18:40:21+09:00
+STEP 4 | h18_sto6g_36q  | job 3091 | nodes kqsvr[04-06] | 2026-10-08T23:26:50+09:00
+[STEP 4] workdir=/data01/hpcuser/sqd/workflow/runs/sc_h18_sto6g_36q_20261008-180057_2339410_step4_d1e8/work
+Fraction of sampled configurations that are valid: 1.0
+Expected fraction of valid configurations from uniformly random bitstrings: 0.034399336436763406
+Iteration 1
+	Subsample 0
+		Energy: -9.729927678438436
+		Subspace dimension: 100000000
+	Subsample 1
+		Energy: -9.729927678438422
+		Subspace dimension: 100000000
+	Subsample 2
+		Energy: -9.7299276784385
+		Subspace dimension: 100000000
+Iteration 2
+	Subsample 0
+		Energy: -9.72992767843845
+		Subspace dimension: 100000000
+	Subsample 1
+		Energy: -9.729927678438429
+		Subspace dimension: 100000000
+	Subsample 2
+		Energy: -9.729927678438465
+		Subspace dimension: 100000000
+Final energy: -9.7299276784385
+Final energy error: nan
+[STEP 4] 완료
+끝 2026-10-09T00:33:48+09:00

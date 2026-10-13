@@ -1,0 +1,26 @@
+{
+  "/data01/hpcuser/sqd/workflow/runs/diag_h16_emu3node/work": {
+    "qubits": 32,
+    "fci_dimension": 165636900,
+    "norm": 1.0000000000000853,
+    "sampler": "emulator",
+    "samples": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 76671,
+      "xeb_ratio": 0.9992523033084735,
+      "top200_chi2": 177.64054576881296,
+      "top200_pvalue": 0.8705341715727541,
+      "top200_exact_mass": 0.02496008939130146
+    },
+    "exact_reference": {
+      "shots": 100000,
+      "valid": 1.0,
+      "unique": 76605,
+      "xeb_ratio": 1.0073403618040204,
+      "top200_chi2": 209.44593968931935,
+      "top200_pvalue": 0.3091461647917405,
+      "top200_exact_mass": 0.02496008939130146
+    }
+  }
+}

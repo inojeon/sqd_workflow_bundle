@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.17, pytest-8.4.2, pluggy-1.6.0 -- /data01/hpcuser/sqd/workflow/venv-py311/bin/python
+rootdir: /home/kq/Workspace/SQD_bench/sqd_workflow_bundle
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 7 items
+
+tests/test_ibm_steps.py::test_ibm_steps_match_reference PASSED           [ 14%]
+tests/test_scaled.py::test_preset16_matches_ibm_steps PASSED             [ 28%]
+tests/test_scaled.py::test_emulator_qasm_matches_exact_distribution PASSED [ 42%]
+tests/test_scaled.py::test_convert_emulator_counts_bit_order PASSED      [ 57%]
+tests/test_stages.py::test_staged_run_matches_reference PASSED           [ 71%]
+tests/test_stages.py::test_mpi_step4_matches_serial[2] PASSED            [ 85%]
+tests/test_stages.py::test_mpi_step4_matches_serial[3] PASSED            [100%]
+
+============================== 7 passed in 26.27s ==============================

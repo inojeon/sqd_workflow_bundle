@@ -1,6 +1,6 @@
 # run_steps.py로 이해하는 SQD 워크플로우
 
-IBM small-scale simulator 예제의 계산을 네 단계로 실행하고, 이후 워크플로우 SDK에 연결하기 위한 개발자·연구자 가이드입니다. 정리일: 2026-10-07.
+IBM small-scale simulator 예제의 계산을 네 단계로 실행하고, 이후 워크플로우 SDK에 연결하기 위한 개발자·연구자 가이드입니다. 정리일: 2026-10-07. 갱신: 2026-10-08(STEP별 Slurm 작업, STEP 4 MPI 배치 병렬).
 
 > 이 폴더는 **SDK 연결 직전의 독립 실행 패키지**입니다. 실행 코드는 기존 계산을 그대로 복사했으며, 파일 배치·설치 설정·검증·설명 문서를 함께 제공합니다.
 
@@ -64,10 +64,15 @@ print(len(result.result_history))
 | [원본 코드](../references/n2_small_scale/original.py) | IBM 예제 코드 셀 보존본 | 과학 코드 출처를 비교할 때 |
 | [독립 원본 실행기](../references/n2_small_scale/run_reference.py) | 원본 실행·중간 데이터 저장 | 재현 검증할 때 |
 | [비교 테스트](../tests/test_ibm_steps.py) | 적분·샘플·에너지·점유수·이력 비교 | 변경 후 검증할 때 |
+| [run_step.py](../run_step.py) / [sqd_workflow/stages.py](../sqd_workflow/stages.py) | STEP 하나만 실행, STEP 사이 파일 계약 | STEP별 Slurm 작업으로 돌릴 때 |
+| [sqd_workflow/mpi_solver.py](../sqd_workflow/mpi_solver.py) | STEP 4 MPI 배치 병렬 sci_solver | STEP 4를 여러 rank로 돌릴 때 |
+| [slurm/](../slurm/site.env) | 사이트 설정·공유 환경 빌드·작업 사슬 제출 | 클러스터에서 실행할 때 |
+| [sqd_workflow/scaled.py](../sqd_workflow/scaled.py) / [run_scaled.py](../run_scaled.py) | 문제 크기 일반화(36큐비트), 에뮬레이터 QASM·샘플러 | 큰 문제를 돌릴 때 |
+| [분리 실행 테스트](../tests/test_stages.py) | STEP별 프로세스 실행 = 원본, MPI STEP 4 = 단일 프로세스 | 변경 후 검증할 때 |
 | [COPY_MANIFEST.json](../COPY_MANIFEST.json) | 원 프로젝트 복사 출처와 해시 | 전달 이력을 확인할 때 |
 | [NOTICE](../NOTICE.md) | IBM 라이선스와 수정 내역 | 재배포할 때 |
 
-원 프로젝트의 다른 계산 경로인 `prepare/sample/postprocess/solve`, CLI, MPI 코드는 이 폴더의 실행 의존성이 아닙니다. 이 패키지에는 `run_steps.py`가 실제 사용하는 코드만 담았습니다.
+원 프로젝트의 다른 계산 경로인 `prepare/sample/postprocess/solve`, CLI, MPI 코드는 이 폴더의 실행 의존성이 아닙니다. 이 패키지에는 `run_steps.py`가 실제 사용하는 코드와, 같은 계산을 STEP별 작업으로 나눠 돌리는 코드(`run_step.py`, `stages.py`, `mpi_solver.py`, `slurm/`)만 담았습니다.
 
 ## 4. 네 단계와 의존 관계
 
@@ -155,16 +160,87 @@ result = step4_postprocess(mapped, executed)
 
 | 연결 지점 | 추가 구현과 검증 |
 | --- | --- |
-| 서로 다른 프로세스/노드 | 적분은 NPZ 등, 메타데이터·RNG는 JSON, 최적화 회로는 QPY 등으로 저장하고 schema/version을 정의 |
-| STEP 1 → STEP 2 | 추상 ffsim 회로의 직렬화 가능 여부 확인. pass manager는 설정으로 재구성하는 방식을 검토 |
-| STEP 3 → STEP 4 | 샘플 수, 측정 레지스터명, 스핀 순서, qubit/clbit/layout 매핑을 보존. 필요하면 BitArray로 재구성하는 어댑터 작성 |
+| 서로 다른 프로세스/노드 | **구현됨**(아래 6.1). 적분 NPZ, RNG·메타데이터 JSON, ISA 회로 QPY. schema/version 정의는 남음 |
+| STEP 1 → STEP 2 | **구현됨**. 추상 회로는 pickle(같은 환경 전용), pass manager는 같은 seed로 재구성 |
+| STEP 3 → STEP 4 | **구현됨**. 측정 bool 배열 → `BitArray`로 재구성. 실제 QPU의 레지스터명·layout 매핑은 남음 |
 | 실제 QPU 제출 | 인증·job ID·재시도·결과 수집 및 실제 장치용 transpilation 구현 |
-| Slurm | 작업별 자원 선언, 실패 전파, 출력 경로, 재시작·캐시 규칙 구현 |
-| MPI/GPU SQD | `sci_solver` 연결점 검토. 배치 분산과 한 배치 내부의 분산 대각화를 구별하고 에너지 동등성 검증 |
+| Slurm | **구현됨**(작업별 자원, afterok 실패 전파, 실행 폴더). 재시작·캐시 규칙은 남음 |
+| MPI/GPU SQD | **배치 분산 구현됨**(PySCF, 6.1). 한 배치 내부의 분산 대각화(SBD 등)와 GPU는 남음 |
 
 Python 객체에 대한 무조건적인 pickle 전송이나 `mpirun python run_steps.py`만으로 분산 워크플로우가 완성되는 것은 아닙니다. 후자는 MPI 통신 로직이 없으므로 동일 계산을 여러 번 독립 실행하게 됩니다.
 
 IBM의 STEP 1~4 구분을 유지한 채 실행 자원을 붙일 수 있습니다. 특히 STEP 4의 SQD 반복과 configuration recovery를 서로 다른 작업으로 더 쪼개려면 반복 상태·장애 복구·동기화 계약을 추가해야 합니다.
+
+### 6.1 STEP별 Slurm 작업과 STEP 4 MPI 배치 병렬 (구현)
+
+STEP 하나를 한 프로세스로 실행하는 `run_step.py`와, 네 STEP을 Slurm 작업 4개로 제출하는 `slurm/`을 추가했습니다. 계산 본문은 `ibm_steps.py`의 네 함수 그대로입니다.
+
+```bash
+python run_step.py 1 --workdir W        # STEP 1~3: 단일 프로세스, MPI 없음
+python run_step.py 2 --workdir W
+python run_step.py 3 --workdir W
+srun --mpi=pmi2 -n 3 python run_step.py 4 --workdir W --mpi   # STEP 4: 배치 k → rank k % 3
+```
+
+| STEP | 읽는 파일 | 쓰는 파일 |
+| --- | --- | --- |
+| 1 | - | `step1_problem.npz`(norb·nelec·적분·상수·FCI), `step1_circuit.pkl`(추상 회로), `step1.json` |
+| 2 | `step1_circuit.pkl`, `step1.json` | `step2_isa.qpy`, `step2.json` |
+| 3 | `step2_isa.qpy` | `step3_samples.npz`(측정 bool 배열), `step3_rng.json`(측정 직후 난수 상태), `step3.json` |
+| 4 | `step1_problem.npz`, `step3_samples.npz`, `step3_rng.json` | `step4_result.json`(총에너지·점유수·반복별 배치), `step4_state.npz`(SCIState), `step4.json` |
+
+`stepN.json`에는 입력·출력 SHA-256, Python·패키지 버전, 호스트, 소요 시간이 남습니다. STEP 4의 `step4.json`에는 MPI rank 수와 rank별 호스트도 기록됩니다.
+
+- **pass manager:** qiskit의 pass manager는 pickle할 수 없습니다(HLSConfig 안의 lambda). STEP 2가 `step1.json`의 `compilation_seed`로 같은 backend·pass manager를 다시 만듭니다. 그래서 `compilation_seed=None`(원문의 비결정적 컴파일)은 분리 실행에서 지원하지 않습니다.
+- **추상 회로:** ffsim 사용자 정의 게이트가 있어 pickle로 넘깁니다. 같은 환경의 STEP 1이 쓴 파일만 읽으세요. ISA 회로는 표준 게이트라 QPY로 넘깁니다.
+- **STEP 4 MPI:** SDK의 `diagonalize_fermionic_hamiltonian`은 MPI SPMD를 지원합니다. CI 문자열 준비와 결과 처리는 rank 0이 하고, `sci_solver`만 모든 rank가 함께 부릅니다. `mpi_solver.batch_parallel`이 원문의 solver(`spin_sq=0.0`, `max_cycle=200`)를 감싸 배치 k를 rank k % size에 맡기고 결과를 rank 0으로 모읍니다. `step4_postprocess`의 새 인자 `wrap_solver`로 넘기며, 기본값 None은 원문 그대로입니다.
+- **동등성:** SDK의 `solve_sci_batch`는 배치마다 `solve_sci`를 독립 호출합니다. 그래서 rank당 스레드 수가 같으면 단일 프로세스와 **비트 단위로 같은** 결과가 나옵니다. 스레드 수를 바꾸면 점유수 마지막 자리(1e-16 수준)가 달라질 수 있습니다.
+- **성능:** IBM 예제 크기(배치당 D ≤ 2,500)에서는 MPI 시작 비용 때문에 오히려 느립니다(0.79배). 배치당 D 10⁵·10⁶·4×10⁶에서는 같은 코어 수의 단일 프로세스보다 1.08·1.25·1.44배 빠릅니다. 구성 복구 등 rank 0만 하는 약 35초는 줄지 않습니다. 측정 방법과 전체 결과: [validation/bench_step4](../validation/bench_step4/README.md). 측정 도구: [bench/](../bench/README.md). 하이퍼스레드 노드에서는 `--hint=nomultithread`로 rank마다 물리 코어를 줍니다(`slurm/`에 반영).
+- **병렬도의 한계:** 배치 수(기본 3)까지만 나눠집니다. rank를 배치 수보다 많이 주면 남는 rank는 놉니다. 배치 하나의 대각화를 여러 rank가 나눠 풀지는 않으므로, 배치 하나는 노드 하나의 메모리 안에 들어가야 합니다.
+- **SBD를 넣지 않은 이유:** SBD(sbd-eigensolver)는 `spin_sq`를 지원하지 않습니다. N₂ 예제에서 IBM 원본(`spin_sq=0.0`)보다 1.6e-7 Ha 낮은 값(= PySCF `spin_sq=None`)을 냅니다. IBM 원본과 같은 결과를 유지하기 위해 PySCF만 씁니다.
+- **실패 처리:** 한 rank에서 예외가 나면 `comm.Abort`로 전체 작업을 끝냅니다(다른 rank가 MPI 대기에 남지 않게). SDK가 MPI를 감지하지 못하면 STEP 4가 바로 실패합니다.
+
+**클러스터 실행.** 사이트 값은 `slurm/site.env` 하나에 모았습니다(공유 경로, 제출 계정, MPI 경로, 파티션, 패브릭).
+
+```bash
+slurm/setup_env.sh                                  # 최초 1회(uv.lock이 바뀌면 다시): Python 3.11 + uv.lock + mpi4py(사이트 MPI로 빌드)
+slurm/submit_chain.sh -w kqsvr04 -n 3 -c 1          # 1노드, STEP 4 3 rank
+slurm/submit_chain.sh -w kqsvr04,kqsvr05 -N 2 -n 3  # STEP 4 2노드 (STEP 1~3은 첫 노드)
+```
+
+`submit_chain.sh`는 실행 폴더 `runs/<run_id>/`에 번들 사본(`code/`)을 만들고, STEP 1~4를 `--dependency=afterok`로 이어 제출합니다. 앞 작업이 실패하면 뒤 작업은 취소됩니다(`--kill-on-invalid-dep=yes`). STEP 1~3 작업은 SDK의 MPI 자동 감지 변수(`SLURM_NTASKS` 등)를 지우고 실행합니다. STEP 4는 `srun --mpi=pmi2`로 rank를 띄우고, `--propagate`에서 MEMLOCK을 빼 verbs 패브릭이 로그인 노드의 memlock 한도에 걸리지 않게 합니다(sqd_perf X40에서 확인한 설정).
+
+### 6.2 큰 문제(36큐비트)와 MPI 에뮬레이터 (구현)
+
+`ibm_steps.py`는 IBM 예제(16큐비트) 원문 그대로 두고, 같은 계산을 문제 정의로 일반화한 `sqd_workflow/scaled.py`와 `run_scaled.py`를 추가했습니다. 파일 계약이 같아서 STEP 4는 `run_step.py 4`(MPI 배치 병렬)를 그대로 씁니다.
+
+| 프리셋 | 분자·기저 | 활성 공간 | 큐비트 | LUCJ | 비고 |
+| --- | --- | --- | ---: | ---: | --- |
+| `n2_sto6g_16q` | N₂ 1.0 Å, STO-6G | 8궤도, 전자 10 | 16 | 4회 | IBM 예제와 같은 적분·회로·샘플(테스트로 확인) |
+| `n2_ccpvdz_36q` | N₂ 1.0 Å, cc-pVDZ | 18궤도, 전자 10 (코어 2 동결) | 36 | 1회 | FCI 차원 7.3×10⁷. `--norb`로 같은 계열의 작은 크기 |
+| `h18_sto6g_36q` | H₁₈ 사슬 1.0 Å, STO-6G | 18궤도, 전자 (9,9) | 36 | 4회(시험은 2회) | 반 채움, D 상한 2.4×10⁹. FCI 대신 CCSD(T). [최대 규모 시험](최대규모_H18_36큐비트.md) |
+
+STEP 3 샘플러는 세 가지입니다.
+
+- `statevector`: Qiskit 상태벡터. 30큐비트 근처까지.
+- `ffsim`: 전자 수 보존 공간에서 LUCJ 상태를 정확히 계산해 샘플링. 36큐비트도 1.2 GB.
+- `emulator`: pennylane-lightning-MPI `mpi_counts_cli`(v3)로 2³⁶ 상태벡터를 3노드 64 rank에 나눠 계산해 샘플링.
+
+STEP 2는 ISA 회로를 에뮬레이터 게이트(h x y z rx ry rz cx cz swap cp)로 바꾼 OpenQASM(`step2_emulator.qasm`)과, 고전 비트 → 물리 큐비트 대응표(`step2_measure_map.json`)를 함께 씁니다. 에뮬레이터는 모든 물리 큐비트를 문자열 왼쪽부터 q0 순서로 내므로, STEP 3이 이 대응표로 Qiskit 순서로 되돌립니다.
+
+```bash
+python run_scaled.py 1 --problem n2_ccpvdz_36q --workdir W --threads 32   # 적분·FCI·CCSD·LUCJ
+python run_scaled.py 2 --problem n2_ccpvdz_36q --workdir W                # ISA + 에뮬레이터 QASM
+python run_scaled.py 3 --problem n2_ccpvdz_36q --workdir W --sampler ffsim
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -s emulator -N 3 -P 64 -T 08:00:00   # STEP 1~4 Slurm 사슬
+slurm/submit_scaled.sh -p n2_ccpvdz_36q -a "--norb 14 --no-fci"           # 28큐비트(같은 계열)
+python bench/compare_samples.py W                                          # 샘플 ↔ 정확한 분포 검사
+```
+
+- **에뮬레이터 rank 수는 2의 거듭제곱이어야 합니다.** 아니면 결과가 조용히 틀립니다. `submit_scaled.sh`가 확인합니다.
+- **정확성 확인:** 16큐비트 QASM의 분포가 ffsim 정확 분포와 TVD 2×10⁻¹⁴로 같습니다. 16·28·32·34큐비트 에뮬레이터 샘플도 정확한 분포와 통계적으로 구별되지 않습니다.
+- **STEP 4 설정:** IBM 설정(`max_dim=50`)이면 큐비트가 늘어도 배치당 D가 2,500에 머물러 에너지가 CCSD보다 높습니다. 큰 문제에는 `-x "--set max_dim=1000 --set samples_per_batch=10000"`처럼 키웁니다.
+- 실행 결과: [36큐비트 실행 결과](36큐비트_실행.md), [최대 규모 시험(H₁₈, D 10⁸)](최대규모_H18_36큐비트.md). 끝난 실행에 STEP 4만 다른 설정으로 다시 돌리려면 `slurm/submit_step4.sh`를 씁니다.
 
 ## 7. 원본과 같은 계산인지 확인
 
@@ -180,6 +256,8 @@ uv run --locked --extra test python -m pytest -q
 - 총에너지·FCI 값·궤도 점유수.
 - 반복마다 모든 배치의 차원·에너지·점유수.
 - STEP 4를 호출해도 입력 RNG 상태가 바뀌지 않는지.
+- (`test_stages.py`) STEP마다 새 프로세스로 `run_step.py`를 실행해도 위 비교가 모두 같은지.
+- (`test_stages.py`, `mpi` 표시) STEP 4를 MPI 2·3 rank로 돌린 결과가 단일 프로세스 STEP 4와 비트 단위로 같은지. mpi4py와 `mpiexec`(또는 `SQD_MPIEXEC` 환경변수의 실행 명령)가 없으면 건너뜁니다.
 
 비교 테스트의 에너지 허용오차는 1e-8 Ha입니다. 물리적 SQD 수렴 허용오차 1e-3 Ha와 목적이 다릅니다. 전자는 같은 알고리즘을 분리해도 같은 계산을 하는지 검사하고, 후자는 반복 종료를 결정합니다.
 
@@ -191,7 +269,7 @@ uv run --locked python references/n2_small_scale/run_reference.py --output runs/
 
 원본 실행기는 `hamiltonian.npz`, `samples.npz`, `circuit.qpy`, `rng.json`, `history.json`, `result.json` 등을 저장합니다. 계산은 현재 모듈을 호출하지 않고 보존 원본 셀에서 실행합니다. 불필요한 QPU·plot import를 제외하고 backend/transpiler seed를 고정하며 결과 저장을 추가한 실행 어댑터입니다.
 
-기존 검증 환경의 결과는 총에너지 약 −108.59593164616311 Ha, FCI 대비 차이 약 5.57e-5 Ha, SQD 반복 2회였습니다. 이 패키지의 분리 실행 결과·환경은 [검증 기록](../validation/README.md)에서 확인합니다. OS·라이브러리·BLAS 차이로 마지막 자릿수나 선택 경로가 달라질 수 있습니다.
+기존 검증 환경의 결과는 총에너지 약 −108.59593164616311 Ha, FCI 대비 차이 약 5.57e-5 Ha, SQD 반복 2회였습니다. 이 패키지의 분리 실행 결과·환경은 [검증 기록](../validation/README.md)에서 확인합니다. OS·라이브러리·BLAS 차이로 마지막 자릿수나 선택 경로가 달라질 수 있습니다. 실제로 Linux x86_64(kqsvr04·kqdata01, 같은 패키지 버전)에서는 총에너지가 −108.59592219311702 Ha로 macOS arm64 값과 9.5e-6 Ha 다릅니다. 어느 STEP에서 갈라지는지는 분리하지 않았습니다. 같은 플랫폼에서 독립 원본 실행기와 비교하면 1e-8 Ha 안에서 같으므로, 플랫폼 간 비교에는 이 테스트를 각 플랫폼에서 다시 돌리세요.
 
 ## 8. 변경할 설정과 흔한 문제
 

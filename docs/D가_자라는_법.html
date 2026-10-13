@@ -1,0 +1,357 @@
+<title>D가 자라는 법</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* 레이아웃: 한 줄 본문(최대 68ch) 사이에 가로폭 전체를 쓰는 '실험판'(그림·조작) 블록이 끼어드는 교과서 형식 */
+:root {
+  --bg: #f7f5ef;        /* 종이 */
+  --fg: #1d2433;        /* 잉크 */
+  --muted: #5d6676;
+  --rule: #d9d3c5;
+  --panel: #ffffff;
+  --alpha: #0b6e99;     /* ↑스핀 */
+  --beta: #b8542a;      /* ↓스핀 */
+  --cell: #e6e1d5;      /* 빈 칸 */
+  --carry: #e9b949;     /* 이월(carryover) */
+  --new: #5aa469;       /* 새로 뽑힘 */
+  --bad: #c44d58;       /* 전자 수 틀림 */
+  --display: "IBM Plex Sans KR", "Noto Sans KR", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #171a21; --fg: #e8e6df; --muted: #a2a8b3; --rule: #343947; --panel: #1f232d;
+  --alpha: #4fb3e0; --beta: #e8895d; --cell: #2b3040; --carry: #e3c35c; --new: #6ec47e; --bad: #e06b74; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #171a21; --fg: #e8e6df; --muted: #a2a8b3; --rule: #343947; --panel: #1f232d;
+  --alpha: #4fb3e0; --beta: #e8895d; --cell: #2b3040; --carry: #e3c35c; --new: #6ec47e; --bad: #e06b74; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 16px; line-height: 1.7;
+  padding-block: 32px 64px; padding-inline: 16px; }
+main { max-width: 68ch; margin-inline: auto; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.25; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; margin: 0 0 .4rem; }
+h2 { font-size: 1.35rem; margin: 2.6rem 0 .6rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .4rem; }
+p { margin: .6rem 0; }
+.lede { color: var(--muted); font-size: 1.05rem; }
+.eyebrow { font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+.formula { font-family: var(--mono); background: var(--panel); border: 1px solid var(--rule); border-radius: 6px;
+  padding: .6rem .9rem; margin: .8rem 0; overflow-x: auto; font-variant-numeric: tabular-nums; }
+.lab { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; margin: 1rem 0; }
+.lab .eyebrow { margin-bottom: .4rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 12px; }
+.controls label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); min-width: 0; }
+.controls input[type=range] { width: 160px; max-width: 100%; }
+.controls output { font-family: var(--mono); color: var(--fg); }
+button { font: inherit; font-size: .9rem; padding: .45rem .9rem; border-radius: 6px; border: 1px solid var(--fg);
+  background: var(--fg); color: var(--bg); cursor: pointer; }
+button.quiet { background: transparent; color: var(--fg); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--alpha); outline-offset: 2px; }
+.stage { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; align-items: start; }
+.stage > * { min-width: 0; }
+@media (max-width: 640px) { .stage { grid-template-columns: 1fr; } }
+.lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lists > * { min-width: 0; }
+.list h4 { margin: 0 0 .3rem; font-size: .85rem; font-weight: 500; }
+.list ul { list-style: none; margin: 0; padding: 0; font-family: var(--mono); font-size: .82rem; line-height: 1.5;
+  max-height: 260px; overflow-y: auto; }
+.list li { display: flex; justify-content: space-between; gap: 8px; padding-inline: 4px; border-radius: 3px; }
+.list li .cnt { color: var(--muted); }
+.list li.carry { background: color-mix(in srgb, var(--carry) 30%, transparent); }
+.list li.new { background: color-mix(in srgb, var(--new) 22%, transparent); }
+.list li.cut { opacity: .35; text-decoration: line-through; }
+.a { color: var(--alpha); } .b { color: var(--beta); }
+.grid { display: grid; gap: 2px; width: 100%; max-width: 360px; aspect-ratio: 1; }
+.grid div { background: var(--cell); border-radius: 1px; }
+.grid div.on { background: var(--alpha); }
+.grid div.hit { background: var(--beta); }
+.grid div.cut { background: transparent; border: 1px dashed var(--rule); }
+.kpi { display: flex; flex-wrap: wrap; gap: 8px 24px; font-family: var(--mono); font-size: .9rem; margin-top: 10px;
+  font-variant-numeric: tabular-nums; }
+.kpi b { font-size: 1.3rem; font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .8rem; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+.sample { font-family: var(--mono); font-size: .82rem; display: flex; flex-wrap: wrap; gap: 6px 14px; max-height: 120px;
+  overflow-y: auto; margin-top: 8px; }
+.sample span.x { color: var(--bad); text-decoration: line-through; }
+svg { max-width: 100%; height: auto; display: block; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--fg); }
+svg .mut { fill: var(--muted); }
+svg .axis { stroke: var(--rule); stroke-width: 1; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: .4rem .5rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: .8rem; }
+td.num, th.num { text-align: right; }
+.wide { overflow-x: auto; }
+.note { font-size: .88rem; color: var(--muted); border-left: 3px solid var(--rule); padding-left: 12px; margin: 1rem 0; }
+.steps { counter-reset: s; padding-left: 0; list-style: none; }
+.steps li { counter-increment: s; position: relative; padding-left: 2.2rem; margin: .5rem 0; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: .15rem; width: 1.5rem; height: 1.5rem;
+  border-radius: 50%; background: var(--fg); color: var(--bg); font-family: var(--mono); font-size: .8rem;
+  display: grid; place-items: center; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+<div class="eyebrow">SQD 워크플로우 · 입문 설명 2</div>
+<h1>D가 자라는 법</h1>
+<p class="lede">고전컴퓨터가 푸는 표의 크기 D는 "후보 목록 길이의 제곱"이다. 이 글은 그 목록이 어떻게 만들어지는지, 그리고 반복(iteration)을 돌릴수록 왜 목록이 길어지는지를 작은 장난감 문제로 직접 만져 보며 설명한다. 실제 코드(qiskit-addon-sqd 0.13)의 규칙을 그대로 축소한 것이다.</p>
+
+<h2>1. 샘플 하나는 두 줄로 쪼개진다</h2>
+<p>양자컴퓨터가 뽑아 주는 샘플 하나는 0/1이 2×(궤도 수)개 늘어선 비트열이다. 앞 절반은 ↓스핀 전자, 뒤 절반은 ↑스핀 전자의 자리를 적는다. 고전컴퓨터는 이것을 받자마자 <b class="b">↓줄</b>과 <b class="a">↑줄</b> 두 개로 자른다.</p>
+<div class="lab">
+  <div class="eyebrow">그림 1 · 장난감 문제: 궤도 6개, 전자 ↑3개 ↓3개 (12큐비트)</div>
+  <svg viewBox="0 0 520 150" role="img" aria-label="12비트 샘플이 ↓줄 6비트와 ↑줄 6비트로 나뉘는 그림">
+    <text x="10" y="18" class="mut">샘플 1개 (12비트)</text>
+    <g id="bits12"></g>
+    <path d="M150 70 L150 95 L95 95 L95 108" fill="none" class="axis" stroke-width="1.5"/>
+    <path d="M370 70 L370 95 L425 95 L425 108" fill="none" class="axis" stroke-width="1.5"/>
+    <text x="10" y="125" class="mut">↓줄</text>
+    <text x="340" y="125" class="mut">↑줄</text>
+    <g id="bitsB"></g><g id="bitsA"></g>
+  </svg>
+  <p class="note">↑줄 하나로 가능한 모양은 "6칸 중 3칸 고르기" = C(6,3) = 20가지. ↓줄도 20가지. 실제 H₁₆(궤도 16, 전자 8+8)에서는 한 줄에 C(16,8) = 12,870가지다.</p>
+</div>
+
+<h2>2. 샘플을 모아 목록을 만들고, 목록끼리 곱한다</h2>
+<p>샘플을 여러 개 뽑으면 같은 줄이 여러 번 나온다. 고전컴퓨터는 <b>서로 다른</b> ↑줄만 모아 ↑목록을, 서로 다른 ↓줄만 모아 ↓목록을 만든다. 그리고 두 목록의 <b>모든 조합</b>을 표로 만든다. 이 표의 칸 수가 D다.</p>
+<div class="formula">D = (↑목록 길이) × (↓목록 길이)</div>
+<p>여기서 중요한 점 하나. 표에는 <b>실제로 함께 뽑힌 적이 없는 조합</b>도 들어간다. ↑줄 A가 ↓줄 X와 같이 뽑혔고 ↑줄 B가 ↓줄 Y와 같이 뽑혔다면, (A,Y)와 (B,X)도 표에 들어간다. 그래서 샘플 수보다 D가 훨씬 빨리 커진다. 아래에서 직접 뽑아 보자.</p>
+
+<div class="lab" id="lab2">
+  <div class="eyebrow">실험 1 · 샘플을 뽑아 목록과 표를 만들기</div>
+  <div class="controls">
+    <label>한 배치의 샘플 수 (samples_per_batch) <input type="range" id="l2n" min="1" max="120" value="12"><output id="l2nOut">12</output></label>
+    <label>분포의 퍼짐 (결합 길이 늘리기) <input type="range" id="l2t" min="1" max="10" value="4"><output id="l2tOut">4</output></label>
+    <label>목록 길이 상한 (max_dim) <input type="range" id="l2m" min="1" max="20" value="20"><output id="l2mOut">20</output></label>
+    <button id="l2go">다시 뽑기</button>
+  </div>
+  <div class="stage">
+    <div>
+      <div class="lists">
+        <div class="list"><h4 class="a">↑목록 (서로 다른 ↑줄, 많이 나온 순)</h4><ul id="l2A"></ul></div>
+        <div class="list"><h4 class="b">↓목록 (서로 다른 ↓줄)</h4><ul id="l2B"></ul></div>
+      </div>
+      <div class="eyebrow" style="margin-top:10px">뽑힌 샘플 (↓줄·↑줄)</div>
+      <div class="sample" id="l2S"></div>
+    </div>
+    <div>
+      <div class="grid" id="l2G"></div>
+      <div class="legend"><span><i style="background:var(--beta)"></i>실제로 함께 뽑힌 조합</span><span><i style="background:var(--alpha)"></i>목록끼리 곱해서 생긴 조합</span><span><i style="background:var(--cell)"></i>표 밖 (20×20 전체)</span></div>
+      <div class="kpi"><span>↑목록 <b id="l2ka">0</b></span><span>↓목록 <b id="l2kb">0</b></span><span>D <b id="l2kd">0</b></span><span>실제 조합 <b id="l2kp">0</b></span></div>
+    </div>
+  </div>
+  <p class="note">샘플 수 슬라이더를 오른쪽으로 밀면 목록이 길어지고 D는 그 제곱으로 커진다. 상한(max_dim)을 내리면 목록을 많이 나온 순으로 자르고, 잘린 줄은 흐리게 표시된다. "퍼짐"을 키우면 전자가 여러 모양에 골고루 퍼져(늘린 사슬) 같은 샘플 수로도 목록이 더 길어진다.</p>
+</div>
+
+<h2>3. 반복(iteration)이 D를 키우는 과정</h2>
+<p>STEP 4는 표를 한 번만 풀고 끝내지 않는다. 다음 네 단계를 <code>max_iterations</code>번 돈다.</p>
+<ol class="steps">
+  <li><b>풀(pool) 만들기.</b> 첫 반복에서는 전자 수가 맞는 샘플만 쓴다(틀린 샘플은 버림). 두 번째 반복부터는 앞 반복의 답에서 얻은 "자리별 전자 평균"을 보고 <b>틀린 샘플을 고쳐서</b> 풀에 넣는다(구성 복구).</li>
+  <li><b>배치 뽑기.</b> 풀에서 <code>samples_per_batch</code>개를 뽑아 배치를 만든다(배치마다 따로, <code>num_batches</code>개).</li>
+  <li><b>목록 만들기.</b> 배치의 서로 다른 ↑줄·↓줄로 목록을 만드는데, 그 앞에 <b>앞 반복에서 중요했던 줄(이월, carryover)</b>을 먼저 넣는다. 그 뒤 <code>max_dim</code>으로 자른다. D = 길이의 곱.</li>
+  <li><b>풀고 이월 정하기.</b> 표를 대각화해 답을 얻고, 답에서 비중이 문턱(<code>carryover_threshold</code>, 기본 10⁻⁴) 이상인 줄을 다음 반복의 이월 목록으로 남긴다.</li>
+</ol>
+<p>그래서 반복마다 목록은 <b>"앞 반복의 중요한 줄" ∪ "이번에 새로 뽑힌 줄"</b>이 된다. 새로 뽑힌 줄 중 일부는 처음 보는 것이므로 목록은 반복마다 길어지고, D는 그 제곱으로 자란다. 상한(max_dim)에 닿거나 더 이상 새 줄이 안 나오면 멈춘다.</p>
+
+<div class="lab" id="lab3">
+  <div class="eyebrow">실험 2 · 반복을 한 번씩 돌려 보기</div>
+  <div class="controls">
+    <label>한 배치의 샘플 수 <input type="range" id="l3n" min="1" max="60" value="8"><output id="l3nOut">8</output></label>
+    <label>전자 수 틀린 샘플 비율 (잡음) <input type="range" id="l3e" min="0" max="60" value="30"><output id="l3eOut">30%</output></label>
+    <label>이월 문턱 (비중, 낮을수록 많이 이월) <input type="range" id="l3c" min="0" max="10" value="3"><output id="l3cOut">10⁻³</output></label>
+    <label>목록 길이 상한 (max_dim) <input type="range" id="l3m" min="1" max="20" value="20"><output id="l3mOut">20</output></label>
+    <button id="l3step">다음 반복</button>
+    <button id="l3reset" class="quiet">처음부터</button>
+  </div>
+  <div class="stage">
+    <div>
+      <div class="eyebrow" id="l3title">반복 0 · 아직 시작 전</div>
+      <div class="lists">
+        <div class="list"><h4 class="a">↑목록</h4><ul id="l3A"></ul></div>
+        <div class="list"><h4 class="b">↓목록</h4><ul id="l3B"></ul></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--carry)"></i>앞 반복에서 이월</span><span><i style="background:var(--new)"></i>이번에 새로 들어옴</span></div>
+      <div class="eyebrow" style="margin-top:10px">이번 배치 (전자 수 틀린 샘플은 빨강)</div>
+      <div class="sample" id="l3S"></div>
+    </div>
+    <div>
+      <svg id="l3chart" viewBox="0 0 360 230" role="img" aria-label="반복별 목록 길이와 D"></svg>
+      <div class="kpi"><span>↑목록 <b id="l3ka">0</b></span><span>이월 <b id="l3kc">0</b></span><span>새로 <b id="l3kn">0</b></span><span>D <b id="l3kd">0</b></span></div>
+    </div>
+  </div>
+  <p class="note">"다음 반복"을 누를 때마다 목록 길이(막대)와 D(점선)가 어떻게 변하는지 보자. 잡음을 0%로 두면 첫 반복부터 모든 샘플이 유효하고, 성장은 오직 "이월 ∪ 새로 뽑힘"에서 온다. 잡음을 올리면 첫 반복은 버려진 샘플 때문에 목록이 짧고, 두 번째 반복부터 고쳐진 샘플이 들어와 목록이 더 빨리 자란다. 이월 문턱을 높이면(10⁻¹) 중요하지 않은 줄이 다음 반복에 넘어가지 못해 D가 작게 유지된다.</p>
+</div>
+
+<h2>4. 실제 숫자로 보기</h2>
+<p>H₁₈ 사슬(궤도 18, 전자 9+9, 36큐비트)에서 정확한 분포로 shot을 뽑고 서로 다른 줄의 수를 센 결과다. 한 줄로 가능한 모양은 C(18,9) = 48,620가지다.</p>
+<div class="wide"><table>
+  <tr><th class="num">shot 수</th><th class="num">서로 다른 줄 (↑∪↓)</th><th class="num">D = 길이²</th><th>가능한 48,620 중</th></tr>
+  <tr><td class="num">10,000</td><td class="num">6,913</td><td class="num">4.8×10⁷</td><td>14%</td></tr>
+  <tr><td class="num">100,000</td><td class="num">21,414</td><td class="num">4.6×10⁸</td><td>44%</td></tr>
+  <tr><td class="num">1,000,000</td><td class="num">39,267</td><td class="num">1.5×10⁹</td><td>81%</td></tr>
+  <tr><td class="num">10,000,000</td><td class="num">47,629</td><td class="num">2.3×10⁹</td><td>98%</td></tr>
+</table></div>
+<p>shot을 10배 늘릴 때마다 새 줄이 들어오지만, 가능한 모양을 거의 다 보고 나면(98%) 더 늘려도 소용이 없다. 이것이 "D의 상한 = (가능한 줄 수)²"의 뜻이다. 반복도 같은 상한 안에서만 D를 키운다.</p>
+<p>우리가 지금 고른 H₁₆(궤도 16, 전자 8+8, 32큐비트)은 가능한 줄이 12,870가지, 상한 D는 12,870² ≈ 1.66×10⁸이다. 배치당 샘플 5만 개면 대부분의 줄이 첫 반복부터 들어오고, 그 뒤 반복은 이월로 목록을 상한 가까이 채운다.</p>
+
+<h2>5. 세 줄 요약</h2>
+<ol class="steps">
+  <li>D는 샘플 수가 아니라 <b>서로 다른 ↑줄 수 × 서로 다른 ↓줄 수</b>다. 함께 뽑힌 적 없는 조합도 표에 들어가므로 샘플 수보다 빨리 자란다.</li>
+  <li>반복마다 목록 = <b>앞 반복의 중요한 줄(이월) ∪ 이번에 새로 뽑힌 줄</b>. 잡음이 있으면 고쳐진 샘플도 더해진다. 그래서 반복할수록 D가 커진다.</li>
+  <li>상한은 <b>(가능한 줄 수)²</b>와 <code>max_dim²</code> 중 작은 쪽이다. H₁₆는 1.66×10⁸.</li>
+</ol>
+</main>
+
+<script>
+(() => {
+  // ---------- 장난감 문제: 궤도 6, 전자 3 ----------
+  const NORB = 6, NEL = 3;
+  const strings = [];                 // 전자 수가 맞는 20개 줄
+  for (let s = 0; s < 1 << NORB; s++) if (popcnt(s) === NEL) strings.push(s);
+  const HF = strings[strings.length - 1]; // 111000 (높은 비트가 앞) → 기준 모양
+  function popcnt(x) { let c = 0; while (x) { c += x & 1; x >>= 1; } return c; }
+  function bits(s) { return s.toString(2).padStart(NORB, "0"); }
+  // 분포: 기준 모양에서 멀수록 확률이 작다. spread가 클수록 완만(늘린 사슬).
+  function weights(spread) {
+    const w = strings.map(s => Math.exp(-popcnt(s ^ HF) * 1.6 / spread));
+    const z = w.reduce((a, b) => a + b, 0);
+    return w.map(x => x / z);
+  }
+  function draw(w) { let r = Math.random(), i = 0; for (; i < w.length - 1; i++) { r -= w[i]; if (r <= 0) break; } return strings[i]; }
+  function uniqueSorted(arr) {        // 많이 나온 순
+    const m = new Map(); arr.forEach(s => m.set(s, (m.get(s) || 0) + 1));
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }
+  function fmt(n) { return n.toLocaleString("ko-KR"); }
+
+  // ---------- 그림 1 ----------
+  (function fig1() {
+    const sample = [0b011010, 0b101001];  // ↓줄, ↑줄
+    const g = document.getElementById("bits12"), gb = document.getElementById("bitsB"), ga = document.getElementById("bitsA");
+    const cell = (x, y, ch, cls) => `<rect x="${x}" y="${y}" width="30" height="30" rx="4" fill="${cls}" opacity="${ch === "1" ? 1 : .18}"/><text x="${x + 15}" y="${y + 20}" text-anchor="middle" fill="${ch === "1" ? "#fff" : "currentColor"}">${ch}</text>`;
+    const full = bits(sample[0]) + bits(sample[1]);
+    let s = "";
+    for (let i = 0; i < 12; i++) s += cell(10 + i * 42 + (i >= 6 ? 8 : 0), 28, full[i], i < 6 ? "var(--beta)" : "var(--alpha)");
+    g.innerHTML = s;
+    let sb = "", sa = "";
+    for (let i = 0; i < 6; i++) { sb += cell(10 + i * 34, 110, bits(sample[0])[i], "var(--beta)"); sa += cell(310 + i * 34, 110, bits(sample[1])[i], "var(--alpha)"); }
+    gb.innerHTML = sb; ga.innerHTML = sa;
+  })();
+
+  // ---------- 실험 1 ----------
+  (function lab2() {
+    const $ = id => document.getElementById(id);
+    const grid = $("l2G"); grid.style.gridTemplateColumns = `repeat(${strings.length}, 1fr)`;
+    const cells = strings.map(() => strings.map(() => { const d = document.createElement("div"); grid.appendChild(d); return d; }));
+    const idx = new Map(strings.map((s, i) => [s, i]));
+    function run() {
+      const n = +$("l2n").value, t = +$("l2t").value, m = +$("l2m").value;
+      $("l2nOut").value = n; $("l2tOut").value = t; $("l2mOut").value = m;
+      const w = weights(t);
+      const pairs = Array.from({ length: n }, () => [draw(w), draw(w)]); // [↓, ↑]
+      const ua = uniqueSorted(pairs.map(p => p[1])), ub = uniqueSorted(pairs.map(p => p[0]));
+      const keepA = new Set(ua.slice(0, m).map(e => e[0])), keepB = new Set(ub.slice(0, m).map(e => e[0]));
+      const hit = new Set(pairs.filter(p => keepA.has(p[1]) && keepB.has(p[0])).map(p => p[1] * 64 + p[0]));
+      $("l2A").innerHTML = ua.map(([s, c], i) => `<li class="${i >= m ? "cut" : ""}"><span>${bits(s)}</span><span class="cnt">×${c}</span></li>`).join("");
+      $("l2B").innerHTML = ub.map(([s, c], i) => `<li class="${i >= m ? "cut" : ""}"><span>${bits(s)}</span><span class="cnt">×${c}</span></li>`).join("");
+      $("l2S").innerHTML = pairs.map(p => `<span><span class="b">${bits(p[0])}</span> <span class="a">${bits(p[1])}</span></span>`).join("");
+      strings.forEach((a, i) => strings.forEach((b, j) => {
+        const d = cells[i][j]; d.className = "";
+        if (keepA.has(a) && keepB.has(b)) d.className = hit.has(a * 64 + b) ? "hit" : "on";
+      }));
+      $("l2ka").textContent = keepA.size; $("l2kb").textContent = keepB.size;
+      $("l2kd").textContent = fmt(keepA.size * keepB.size); $("l2kp").textContent = hit.size;
+    }
+    ["l2n", "l2t", "l2m"].forEach(id => $(id).addEventListener("input", run));
+    $("l2go").addEventListener("click", run);
+    run();
+  })();
+
+  // ---------- 실험 2: 반복 ----------
+  (function lab3() {
+    const $ = id => document.getElementById(id);
+    const SPREAD = 4;
+    let w = weights(SPREAD), it = 0, carryA = new Set(), carryB = new Set(), hist = [], occ = null;
+    function noisy(s) {               // 전자 수가 틀린 샘플: 비트 하나를 뒤집는다(전자 2개 또는 4개)
+      const k = Math.floor(Math.random() * NORB); return s ^ (1 << k);
+    }
+    function repair(s) {              // 구성 복구(축소판): 자리별 전자 평균(occ)을 보고 비트를 뒤집어 전자 수를 맞춘다
+      let c = popcnt(s);
+      while (c !== NEL) {
+        const cand = [];
+        for (let k = 0; k < NORB; k++) {
+          const has = (s >> k) & 1;
+          if (c > NEL && has) cand.push([k, 1 - occ[k]]);        // 비울 자리: 평균 점유가 낮은 곳
+          if (c < NEL && !has) cand.push([k, occ[k]]);           // 채울 자리: 평균 점유가 높은 곳
+        }
+        const z = cand.reduce((a, b) => a + b[1] + 1e-6, 0); let r = Math.random() * z, pick = cand[0][0];
+        for (const [k, p] of cand) { r -= p + 1e-6; if (r <= 0) { pick = k; break; } }
+        s ^= 1 << pick; c = popcnt(s);
+      }
+      return s;
+    }
+    function step() {
+      const n = +$("l3n").value, e = +$("l3e").value / 100, thr = Math.pow(10, -(+$("l3c").value)), m = +$("l3m").value;
+      it += 1;
+      // 1. 샘플(잡음 포함) → 풀: 첫 반복은 유효한 것만, 이후는 고쳐서 사용
+      const raw = Array.from({ length: n }, () => { const p = [draw(w), draw(w)]; if (Math.random() < e) { const k = Math.random() < .5 ? 0 : 1; p[k] = noisy(p[k]); } return p; });
+      const rows = raw.map(p => {
+        const ok = popcnt(p[0]) === NEL && popcnt(p[1]) === NEL;
+        if (ok) return { p, ok: true, fixed: false };
+        if (it === 1) return { p, ok: false, fixed: false };
+        return { p: [repair(p[0]), repair(p[1])], ok: false, fixed: true };
+      });
+      const used = rows.filter(r => r.ok || r.fixed).map(r => r.p);
+      // 2·3. 목록 = 이월 ∪ 새로 뽑힌 줄, max_dim 으로 자르기
+      const ua = uniqueSorted(used.map(p => p[1])), ub = uniqueSorted(used.map(p => p[0]));
+      const listA = [...carryA, ...ua.map(x => x[0]).filter(s => !carryA.has(s))].slice(0, m);
+      const listB = [...carryB, ...ub.map(x => x[0]).filter(s => !carryB.has(s))].slice(0, m);
+      const newA = listA.filter(s => !carryA.has(s)).length;
+      // 4. '풀기'(축소판): 표 안에서 진짜 확률로 비중을 계산 → 문턱 이상인 줄을 이월, 자리별 전자 평균 갱신
+      const pA = s => w[strings.indexOf(s)], pB = pA;
+      let z = 0; listA.forEach(a => listB.forEach(b => z += pA(a) * pB(b)));
+      const wa = new Map(listA.map(a => [a, listB.reduce((acc, b) => acc + pA(a) * pB(b), 0) / z]));
+      const wb = new Map(listB.map(b => [b, listA.reduce((acc, a) => acc + pA(a) * pB(b), 0) / z]));
+      occ = Array.from({ length: NORB }, (_, k) => { let o = 0; wa.forEach((p, a) => o += p * ((a >> k) & 1)); return o; });
+      const D = listA.length * listB.length;
+      hist.push({ it, len: listA.length, carry: carryA.size, D });
+      // 화면
+      $("l3title").textContent = `반복 ${it} · 배치 ${n}개 중 유효 ${rows.filter(r => r.ok).length}, 고침 ${rows.filter(r => r.fixed).length}, 버림 ${rows.filter(r => !r.ok && !r.fixed).length}`;
+      const li = (s, carried, wmap) => `<li class="${carried ? "carry" : "new"}"><span>${bits(s)}</span><span class="cnt">${(wmap.get(s) * 100).toFixed(1)}%</span></li>`;
+      $("l3A").innerHTML = listA.map(s => li(s, carryA.has(s), wa)).join("");
+      $("l3B").innerHTML = listB.map(s => li(s, carryB.has(s), wb)).join("");
+      $("l3S").innerHTML = rows.map(r => `<span class="${r.ok ? "" : r.fixed ? "" : "x"}"><span class="b">${bits(r.p[0])}</span> <span class="a">${bits(r.p[1])}</span>${r.fixed ? " ✎" : ""}</span>`).join("");
+      $("l3ka").textContent = listA.length; $("l3kc").textContent = carryA.size; $("l3kn").textContent = newA; $("l3kd").textContent = fmt(D);
+      carryA = new Set(listA.filter(a => wa.get(a) >= thr)); carryB = new Set(listB.filter(b => wb.get(b) >= thr));
+      chart();
+    }
+    function chart() {
+      const W = 360, H = 230, L = 36, R = 44, T = 14, B = 34, iw = W - L - R, ih = H - T - B;
+      const n = Math.max(hist.length, 6), maxLen = 20, maxD = 400;
+      const x = i => L + (i + .5) * iw / n, yl = v => T + ih - v / maxLen * ih, yd = v => T + ih - v / maxD * ih;
+      let s = `<line x1="${L}" y1="${T + ih}" x2="${L + iw}" y2="${T + ih}" class="axis"/>`;
+      [0, 10, 20].forEach(v => s += `<text x="${L - 6}" y="${yl(v) + 4}" text-anchor="end" class="mut">${v}</text><line x1="${L}" y1="${yl(v)}" x2="${L + iw}" y2="${yl(v)}" class="axis" stroke-dasharray="2 4"/>`);
+      [0, 100, 200, 300, 400].forEach(v => s += `<text x="${L + iw + 6}" y="${yd(v) + 4}" class="mut">${v}</text>`);
+      s += `<text x="${L}" y="${T - 3}" class="mut">↑목록 길이(막대)</text><text x="${L + iw}" y="${T - 3}" text-anchor="end" class="mut">D(점선)</text>`;
+      const bw = iw / n * .6;
+      hist.forEach((h, i) => {
+        s += `<rect x="${x(i) - bw / 2}" y="${yl(h.carry)}" width="${bw}" height="${T + ih - yl(h.carry)}" fill="var(--carry)"/>`;
+        s += `<rect x="${x(i) - bw / 2}" y="${yl(h.len)}" width="${bw}" height="${yl(h.carry) - yl(h.len)}" fill="var(--new)"/>`;
+        s += `<text x="${x(i)}" y="${T + ih + 16}" text-anchor="middle" class="mut">${h.it}</text>`;
+      });
+      if (hist.length) s += `<polyline points="${hist.map((h, i) => `${x(i)},${yd(h.D)}`).join(" ")}" fill="none" stroke="var(--fg)" stroke-width="2" stroke-dasharray="5 4"/>` +
+        hist.map((h, i) => `<circle cx="${x(i)}" cy="${yd(h.D)}" r="3.5" fill="var(--fg)"/><text x="${x(i)}" y="${yd(h.D) - 8}" text-anchor="middle">${h.D}</text>`).join("");
+      s += `<text x="${L + iw / 2}" y="${H - 4}" text-anchor="middle" class="mut">반복</text>`;
+      $("l3chart").innerHTML = s;
+    }
+    function reset() { it = 0; carryA = new Set(); carryB = new Set(); hist = []; occ = null;
+      $("l3title").textContent = "반복 0 · 아직 시작 전"; $("l3A").innerHTML = ""; $("l3B").innerHTML = ""; $("l3S").innerHTML = "";
+      ["l3ka", "l3kc", "l3kn"].forEach(id => $(id).textContent = "0"); $("l3kd").textContent = "0"; chart(); }
+    const sync = () => { $("l3nOut").value = $("l3n").value; $("l3eOut").value = $("l3e").value + "%"; $("l3cOut").value = "10⁻" + $("l3c").value; $("l3mOut").value = $("l3m").value; };
+    ["l3n", "l3e", "l3c", "l3m"].forEach(id => $(id).addEventListener("input", sync));
+    $("l3step").addEventListener("click", step); $("l3reset").addEventListener("click", reset);
+    sync(); reset(); step(); step(); step();   // 처음 열면 반복 3회가 이미 보이도록
+  })();
+})();
+</script>

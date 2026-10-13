@@ -5,8 +5,8 @@
       "source": "src/sqd_workflow/ibm_steps.py",
       "destination": "sqd_workflow/ibm_steps.py",
       "source_sha256": "397663df981b9daf083ed4c2b342f476d1e93c495bc014b9afbedfc96b8269d1",
-      "destination_sha256": "397663df981b9daf083ed4c2b342f476d1e93c495bc014b9afbedfc96b8269d1",
-      "adaptation": "byte-identical copy"
+      "destination_sha256": "57a1789e765f01db0a0cc3dc028798d73e1d2a617c72871d03d5adae2cee960a",
+      "adaptation": "modified 2026-10-08: optional keywords for step4_postprocess — wrap_solver (MPI batch parallelism) and settings (size overrides for benchmarks); defaults keep the original behaviour; header comment updated"
     },
     {
       "source": "tests/test_ibm_steps.py",

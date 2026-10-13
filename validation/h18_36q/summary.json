@@ -1,0 +1,491 @@
+{
+  "step1_ffsim": {
+    "step": 1,
+    "elapsed_seconds": 24.503485672175884,
+    "environment": {
+      "python": "3.11.17",
+      "executable": "/data01/hpcuser/sqd/workflow/venv-py311/bin/python",
+      "platform": "Linux-4.18.0-553.el8_10.x86_64-x86_64-with-glibc2.28",
+      "host": "kqsvr04",
+      "packages": {
+        "qiskit": "2.5.2",
+        "qiskit-addon-sqd": "0.13.1",
+        "ffsim": "0.0.84",
+        "pyscf": "2.14.0",
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "mpi4py": "4.1.2"
+      }
+    },
+    "inputs": {},
+    "outputs": {
+      "step1_problem.npz": "32ca8b3031790e2cd235fe8d33f477ea720310466c48d108aaa2dcf2ca9447aa",
+      "step1_circuit.pkl": "cedb5fa6424b5845d64fd06cd1889110b58c6c04603396908016712e023e233c",
+      "step1_ucj.pkl": "46f2fa38fee0ad3eedb805ae3c0066f0b71a4e69b35bdc52cb601cb80f13e7f9"
+    },
+    "compilation_seed": 12345,
+    "norb": 18,
+    "nelec": [
+      9,
+      9
+    ],
+    "qubits": 36,
+    "reference_energy": NaN,
+    "ccsd_energy": -9.728896711016098,
+    "ccsd_t_energy": -9.734997664454962,
+    "rhf_energy": -9.435458168126182,
+    "fci_dimension": 2363904400,
+    "spec": {
+      "name": "h18_sto6g_36q",
+      "atom": [
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            2.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            3.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            4.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            5.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            6.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            7.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            8.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            9.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            10.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            11.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            12.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            13.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            14.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            15.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            16.0
+          ]
+        ],
+        [
+          "H",
+          [
+            0.0,
+            0.0,
+            17.0
+          ]
+        ]
+      ],
+      "basis": "sto-6g",
+      "symmetry": false,
+      "n_frozen": 0,
+      "norb": null,
+      "n_reps": 2,
+      "fci": false,
+      "compilation_seed": 12345,
+      "shots": 10000000,
+      "sample_seed": 12345
+    },
+    "timing": {
+      "ccsd_seconds": 0.24777980893850327,
+      "ccsd_t_seconds": 0.06116437911987305
+    }
+  },
+  "step3_ffsim": {
+    "step": 3,
+    "elapsed_seconds": 552.4286840260029,
+    "environment": {
+      "python": "3.11.17",
+      "executable": "/data01/hpcuser/sqd/workflow/venv-py311/bin/python",
+      "platform": "Linux-4.18.0-553.el8_10.x86_64-x86_64-with-glibc2.28",
+      "host": "kqsvr04",
+      "packages": {
+        "qiskit": "2.5.2",
+        "qiskit-addon-sqd": "0.13.1",
+        "ffsim": "0.0.84",
+        "pyscf": "2.14.0",
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "mpi4py": "4.1.2"
+      }
+    },
+    "inputs": {
+      "step1_ucj.pkl": "46f2fa38fee0ad3eedb805ae3c0066f0b71a4e69b35bdc52cb601cb80f13e7f9"
+    },
+    "outputs": {
+      "step3_samples.npz": "2899694ba23fdbbeb15c466e11644ad073daa46e7b7ffb3c7c0434b6cdba829f",
+      "step3_rng.json": "43091a9c69e3d01beadff461c6ef5cb177d6589da40290f15e9c81ee0184582e"
+    },
+    "sampler": "ffsim",
+    "num_shots": 10000000,
+    "unique": 6078073,
+    "norm": 1.0000000000001101,
+    "dimension": 2363904400,
+    "evolve_seconds": 471.46550400555134,
+    "sample_seconds": 70.70319758355618
+  },
+  "step2_emulator": {
+    "step": 2,
+    "elapsed_seconds": 0.06592583656311035,
+    "environment": {
+      "python": "3.11.17",
+      "executable": "/data01/hpcuser/sqd/workflow/venv-py311/bin/python",
+      "platform": "Linux-4.18.0-553.el8_10.x86_64-x86_64-with-glibc2.28",
+      "host": "kqsvr04",
+      "packages": {
+        "qiskit": "2.5.2",
+        "qiskit-addon-sqd": "0.13.1",
+        "ffsim": "0.0.84",
+        "pyscf": "2.14.0",
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "mpi4py": "4.1.2"
+      }
+    },
+    "inputs": {
+      "step1_circuit.pkl": "8209768d4ee52ad8eb0a3bd8102be92eff43d55674fd5609b3c5b2410eaf27d5"
+    },
+    "outputs": {
+      "step2_isa.qpy": "cc5d6d9ef0e81f1b63e737d7f0ed3db93b6451d96b7040c74be6abd7ee79b63c",
+      "step2_emulator.qasm": "3c2047ccb823f7867a8dd7a9ab82745f4a6af6d70648e6ef6212700bdb18c8bc",
+      "step2_measure_map.json": "b7c7f633da40a9eece16f5b75bfa65f3d8a4c916b63e1e6ccee6e3d1189798e8"
+    },
+    "gate_counts": {
+      "xx_plus_yy": 774,
+      "cp": 104,
+      "p": 72,
+      "measure": 36,
+      "x": 18,
+      "barrier": 1
+    },
+    "depth": 63,
+    "emulator_gate_counts": {
+      "ry": 2976,
+      "cx": 1548,
+      "rz": 1542,
+      "cp": 104,
+      "measure": 36,
+      "barrier": 1
+    },
+    "emulator_gates_total": 6170
+  },
+  "step3_emulator": {
+    "step": 3,
+    "elapsed_seconds": 0.2139255329966545,
+    "environment": {
+      "python": "3.11.17",
+      "executable": "/data01/hpcuser/sqd/workflow/venv-py311/bin/python",
+      "platform": "Linux-4.18.0-553.el8_10.x86_64-x86_64-with-glibc2.28",
+      "host": "kqsvr04",
+      "packages": {
+        "qiskit": "2.5.2",
+        "qiskit-addon-sqd": "0.13.1",
+        "ffsim": "0.0.84",
+        "pyscf": "2.14.0",
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "mpi4py": "4.1.2"
+      }
+    },
+    "inputs": {
+      "step3_emulator_counts.json": "174205d504ad2842ffd83f50218d5cb5de75b46e5db55b435be65b819d693d43",
+      "step2_emulator.qasm": "3c2047ccb823f7867a8dd7a9ab82745f4a6af6d70648e6ef6212700bdb18c8bc"
+    },
+    "outputs": {
+      "step3_samples.npz": "2e3bf5d568db0d29c1091a50191f5352171b4b85bf087c4a03d169ca05178c8c",
+      "step3_rng.json": "43091a9c69e3d01beadff461c6ef5cb177d6589da40290f15e9c81ee0184582e"
+    },
+    "sampler": "emulator",
+    "num_shots": 100000,
+    "unique": 54103,
+    "emulator": {
+      "cli": "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli",
+      "np": 64,
+      "nodes": "kqsvr[04-06]",
+      "hostfile": [
+        "kqsvr04:22",
+        "kqsvr05:21",
+        "kqsvr06:21"
+      ],
+      "shots": 100000,
+      "fuse": "all",
+      "seed": 12345,
+      "wall_seconds": 17089.233501672745,
+      "slurm_job": "3079"
+    }
+  },
+  "emulator": {
+    "cli": "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli",
+    "np": 64,
+    "nodes": "kqsvr[04-06]",
+    "hostfile": [
+      "kqsvr04:22",
+      "kqsvr05:21",
+      "kqsvr06:21"
+    ],
+    "shots": 100000,
+    "fuse": "all",
+    "seed": 12345,
+    "wall_seconds": 17089.233501672745,
+    "slurm_job": "3079"
+  },
+  "step4": {
+    "d1e6": {
+      "energy": -9.64752174771909,
+      "iterations": 2,
+      "D": [
+        [
+          1000000,
+          1000000,
+          1000000
+        ],
+        [
+          1000000,
+          1000000,
+          1000000
+        ]
+      ],
+      "mpi_size": 3,
+      "hosts": [
+        "kqsvr04",
+        "kqsvr04",
+        "kqsvr04"
+      ],
+      "threads_per_rank": 10,
+      "settings": {
+        "max_dim": 1000,
+        "samples_per_batch": 100000
+      },
+      "timing": {
+        "load_seconds": 0.014680750668048859,
+        "postprocess_seconds": 180.26591815799475,
+        "solve_seconds": 169.14594096690416,
+        "solver_calls": [
+          {
+            "seconds": 85.31777950376272,
+            "subspace_dimensions": [
+              1000000,
+              1000000,
+              1000000
+            ]
+          },
+          {
+            "seconds": 83.82816146314144,
+            "subspace_dimensions": [
+              1000000,
+              1000000,
+              1000000
+            ]
+          }
+        ]
+      }
+    },
+    "d1e7": {
+      "energy": -9.709126017057628,
+      "iterations": 2,
+      "D": [
+        [
+          9998244,
+          9998244,
+          9998244
+        ],
+        [
+          9998244,
+          9998244,
+          9998244
+        ]
+      ],
+      "mpi_size": 3,
+      "hosts": [
+        "kqsvr05",
+        "kqsvr05",
+        "kqsvr05"
+      ],
+      "threads_per_rank": 10,
+      "settings": {
+        "max_dim": 3162,
+        "samples_per_batch": 100000
+      },
+      "timing": {
+        "load_seconds": 0.012428030371665955,
+        "postprocess_seconds": 1377.4317655861378,
+        "solve_seconds": 1365.754370689392,
+        "solver_calls": [
+          {
+            "seconds": 682.9911114573479,
+            "subspace_dimensions": [
+              9998244,
+              9998244,
+              9998244
+            ]
+          },
+          {
+            "seconds": 682.7632592320442,
+            "subspace_dimensions": [
+              9998244,
+              9998244,
+              9998244
+            ]
+          }
+        ]
+      }
+    },
+    "d1e8": {
+      "energy": -9.7299276784385,
+      "iterations": 2,
+      "D": [
+        [
+          100000000,
+          100000000,
+          100000000
+        ],
+        [
+          100000000,
+          100000000,
+          100000000
+        ]
+      ],
+      "mpi_size": 3,
+      "hosts": [
+        "kqsvr04",
+        "kqsvr05",
+        "kqsvr06"
+      ],
+      "threads_per_rank": 32,
+      "settings": {
+        "max_dim": 10000,
+        "samples_per_batch": 100000
+      },
+      "timing": {
+        "load_seconds": 0.012395001947879791,
+        "postprocess_seconds": 4013.0371554493904,
+        "solve_seconds": 3994.968683183193,
+        "solver_calls": [
+          {
+            "seconds": 1996.8829423934221,
+            "subspace_dimensions": [
+              100000000,
+              100000000,
+              100000000
+            ]
+          },
+          {
+            "seconds": 1998.085740789771,
+            "subspace_dimensions": [
+              100000000,
+              100000000,
+              100000000
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
