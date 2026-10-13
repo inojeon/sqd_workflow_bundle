@@ -47,6 +47,13 @@ class ProblemSpec:
 
 N2_ATOM = (("N", (0.0, 0.0, -0.5)), ("N", (0.0, 0.0, 0.5)))
 H18_CHAIN = tuple(("H", (0.0, 0.0, 1.0 * i)) for i in range(18))
+
+
+def h_chain(n: int, spacing: float) -> tuple:
+    """수소 원자 n개를 z축에 spacing Å 간격으로 늘어놓은 사슬."""
+    return tuple(("H", (0.0, 0.0, spacing * i)) for i in range(n))
+
+
 PRESETS = {
     # IBM 예제와 같은 문제(검증용)
     "n2_sto6g_16q": ProblemSpec("n2_sto6g_16q", N2_ATOM, "sto-6g", "Dooh", 2, None, 4),
@@ -55,6 +62,12 @@ PRESETS = {
     # 고전 대각화 규모 최대화: 수소 사슬 H18(1.0 Å 간격), STO-6G 18궤도·전자 (9,9) 반 채움 → D 상한 2.4×10⁹.
     # FCI는 계산하지 않고 CCSD(T)를 기록합니다.
     "h18_sto6g_36q": ProblemSpec("h18_sto6g_36q", H18_CHAIN, "sto-6g", False, 0, None, 4, fci=False),
+    # MPI 확장성 측정용(고전으로도 풀리는 문제): 수소 사슬 H16(1.5 Å 간격, 늘린 사슬 = 넓은 분포), STO-6G 16궤도·전자 (8,8)
+    # = 32큐비트, D 상한 12,870² = 1.66×10⁸. FCI 기준값을 계산해 MPI 결과를 정답과 비교합니다. shot 50만(배치 64개 재료).
+    "h16_sto6g_32q": ProblemSpec("h16_sto6g_32q", h_chain(16, 1.5), "sto-6g", False, 0, None, 2, shots=500_000),
+    # 예제(examples/run_example.sh): 에뮬레이터를 1노드에서 몇 분에 돌릴 수 있는 28큐비트 + 고전 D=10⁶ 배치 병렬.
+    # H14(1.5 Å), 14궤도·전자 (7,7), D 상한 3,432² = 1.18×10⁷. shot 20만.
+    "h14_sto6g_28q": ProblemSpec("h14_sto6g_28q", h_chain(14, 1.5), "sto-6g", False, 0, None, 2, shots=200_000),
 }
 
 
@@ -97,6 +110,7 @@ def stage1(workdir: Path, spec: ProblemSpec) -> None:
     started = time.perf_counter()
     mol = pyscf.gto.Mole()
     mol.build(atom=[[a, xyz] for a, xyz in spec.atom], basis=spec.basis, symmetry=spec.symmetry)
+    mol.max_memory = 150_000          # MB. FCI 차원 10⁸ 급(H16: 1.66×10⁸, 벡터당 1.3 GB)에 pyscf 기본 4 GB 는 부족
     norb_total = mol.nao_nr()
     norb = spec.norb or norb_total - spec.n_frozen
     active_space = range(spec.n_frozen, spec.n_frozen + norb)

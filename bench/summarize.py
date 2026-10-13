@@ -58,7 +58,13 @@ def main(argv=None) -> int:
     table, checks = [], []
     for case, hint in sorted({k[:2] for k in runs}):
         keys = sorted((k for k in runs if k[:2] == (case, hint)), key=lambda k: (k[3], k[2][0] != "S", cores(k[2]), k[2]))
+        base_name = "S:1"
         base = runs.get((case, hint, "S:1", 1))
+        if not base:                      # S:1 이 없는 case(큰 D)는 가장 느린 단일 프로세스 구성을 기준으로
+            singles = [k for k in keys if k[2].startswith("S:")]
+            if singles:
+                base_name = max(singles, key=lambda k: statistics.median(x["postprocess"] for x in runs[k]))[2]
+                base = runs[(case, hint, base_name, 1)]
         base_post = statistics.median(x["postprocess"] for x in base) if base else None
         ref = base[0]["result"] if base else None
         for key in keys:
@@ -69,6 +75,7 @@ def main(argv=None) -> int:
                           "wall_s": med["wall"], "step4_s": med["postprocess"], "solve_s": med["solve"],
                           "other_s": med["postprocess"] - med["solve"],
                           "spread_step4": (max(x["postprocess"] for x in rs) - min(x["postprocess"] for x in rs)) / med["postprocess"],
+                          "baseline": base_name if base_post else None,
                           "speedup_vs_S1": base_post / med["postprocess"] if base_post else None,
                           "energy": rs[0]["result"]["total_energy_hartree"]})
             same_t = runs.get((case, hint, f"S:{threads(key[2])}", 1))
@@ -86,10 +93,10 @@ def main(argv=None) -> int:
     summary = {"table": table, "checks_failed": [c for c in checks if not c["ok"]], "n_checks": len(checks),
                "failures": failures}
     (out / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
-    lines = ["| case | CPU 배정 | 구성 | 노드 | CPU | 회차 | D 최대 | 반복 | STEP 4 (s) | 대각화 (s) | 나머지 (s) | S:1 대비 | 실행 전체 (s) |",
+    lines = ["| case | CPU 배정 | 구성 | 노드 | CPU | 회차 | D 최대 | 반복 | STEP 4 (s) | 대각화 (s) | 나머지 (s) | 기준 대비 | 실행 전체 (s) |",
              "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for t in table:
-        sp = f"{t['speedup_vs_S1']:.2f}×" if t["speedup_vs_S1"] else "—"
+        sp = f"{t['speedup_vs_S1']:.2f}× ({t['baseline']})" if t["speedup_vs_S1"] else "—"
         lines.append(f"| {t['case']} | {t['hint']} | {t['config']} | {t['nodes']} | {t['cores']} | {t['rounds']} | {t['max_D']:,} | "
                      f"{t['n_iterations']} | {t['step4_s']:.2f} | {t['solve_s']:.2f} | {t['other_s']:.2f} | {sp} | {t['wall_s']:.2f} |")
     lines.append("")

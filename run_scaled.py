@@ -16,7 +16,7 @@ from pathlib import Path
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("step", type=int, choices=[1, 2, 3])
-    ap.add_argument("--problem", required=True, help="프리셋: n2_sto6g_16q(IBM 예제) | n2_ccpvdz_36q | h18_sto6g_36q")
+    ap.add_argument("--problem", required=True, help="프리셋: n2_sto6g_16q(IBM 예제) | n2_ccpvdz_36q | h18_sto6g_36q | h16_sto6g_32q | h14_sto6g_28q")
     ap.add_argument("--workdir", type=Path, required=True)
     ap.add_argument("--norb", type=int, help="활성 궤도 수 덮어쓰기(큐비트 = 2·norb). 작은 크기 검증·시간 측정용")
     ap.add_argument("--n-reps", type=int, help="LUCJ 반복 수 덮어쓰기")
