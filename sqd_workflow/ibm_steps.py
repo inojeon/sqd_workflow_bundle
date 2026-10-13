@@ -1,5 +1,5 @@
 # Adapted from IBM/Qiskit documentation code snippets, Apache-2.0.
-# Source revision and license: references/n2_small_scale/{source.json,LICENSE}.
+# Source revision and license: archive/references/n2_small_scale/{source.json,LICENSE}.
 # Changes: four explicit functions, typed outputs, RNG snapshot/restore,
 # optional deterministic compilation seeds, Korean boundary comments,
 # optional STEP 4 sci_solver wrapper (MPI batch parallelism) and settings override.

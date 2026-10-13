@@ -24,12 +24,14 @@ from qiskit import QuantumCircuit, QuantumRegister
 
 from sqd_workflow import ibm_steps
 from sqd_workflow.ibm_steps import MappedProblem, ExecutedCircuit, PostprocessedResult, STEP4_SETTINGS
-from sqd_workflow.scaled import _pass_manager, _ucj_operator, h_chain, to_emulator_qasm, convert_emulator_counts
 
 # 사이트 기본값(slurm/site.env 와 같은 값). 다른 클러스터에서는 환경변수로 바꿉니다.
 EMULATOR_CLI = os.environ.get(
     "SQD_EMULATOR_CLI", "/data01/hpcuser/qc-cloud/pennylane-mpi/pennylane-lightning-MPI-v3/build-v3/mpi_counts_cli")
 MPI_HOME = os.environ.get("SQD_MPI_HOME", "/data01/hpcuser/qc-cloud/sw/mpich-4.2.0")
+
+# 에뮬레이터 mpi_counts_cli 가 읽는 OpenQASM 2.0 게이트 집합.
+EMULATOR_GATES = ("h", "x", "y", "z", "rx", "ry", "rz", "cx", "cz", "swap", "cp")
 
 
 @dataclass
@@ -51,6 +53,80 @@ class EmulatorRun:
     wall_seconds: float
     unique_bitstrings: int
 
+
+# ---- 보조 함수: 분자 좌표, LUCJ 회로 부품, 에뮬레이터 입출력 변환 ----
+
+def h_chain(n: int, spacing: float) -> tuple:
+    """수소 원자 n개를 z축에 spacing Å 간격으로 늘어놓은 사슬(pyscf atom 형식)."""
+    return tuple(("H", (0.0, 0.0, spacing * i)) for i in range(n))
+
+
+def _pass_manager(norb: int, seed: int):
+    """ibm_steps.step1_map 과 같은 backend·pass manager(격자 norb×2, 결정적 seed)."""
+    import ffsim
+    from qiskit.providers.fake_provider import GenericBackendV2
+    from qiskit.transpiler import CouplingMap
+    pairs_aa = [(p, p + 1) for p in range(norb - 1)]
+    coupling_map = CouplingMap.from_grid(norb, 2)
+    backend = GenericBackendV2(coupling_map.size(), coupling_map=coupling_map, seed=seed,
+                               basis_gates=["cp", "xx_plus_yy", "p", "x", "swap"])
+    return ffsim.qiskit.generate_lucj_pass_manager(
+        backend=backend, norb=norb, connectivity="square", interaction_pairs=(pairs_aa, None),
+        optimization_level=3, seed_transpiler=seed)
+
+
+def _ucj_operator(norb: int, ccsd, n_reps: int, pairs_ab):
+    """CCSD t1·t2 진폭으로 LUCJ 연산자 생성(ibm_steps.step1_map 과 같은 호출)."""
+    import ffsim
+    pairs_aa = [(p, p + 1) for p in range(norb - 1)]
+    return ffsim.UCJOpSpinBalanced.from_t_amplitudes(
+        t2=ccsd.t2, t1=ccsd.t1, n_reps=n_reps, interaction_pairs=(pairs_aa, pairs_ab), optimize=True)
+
+
+def to_emulator_qasm(isa_circuit) -> tuple[str, list[int], dict]:
+    """ISA 회로 → (OpenQASM 2.0 문자열, measure_map, 게이트 수).
+
+    measure_map[c] = 고전 비트 c가 측정하는 물리 큐비트. 파라미터는 repr(float)로 씁니다(pi 식 금지, 파서 제약).
+    """
+    from qiskit import transpile
+    emu = transpile(isa_circuit, basis_gates=list(EMULATOR_GATES), optimization_level=1)
+    measure_map = [-1] * emu.num_clbits
+    lines = ["OPENQASM 2.0;", 'include "qelib1.inc";', f"qreg q[{emu.num_qubits}];"]   # include는 에뮬레이터가 무시
+    for inst in emu.data:
+        name = inst.operation.name
+        qs = [emu.find_bit(q).index for q in inst.qubits]
+        if name == "measure":
+            measure_map[emu.find_bit(inst.clbits[0]).index] = qs[0]
+            continue
+        if name == "barrier":
+            continue
+        if name not in EMULATOR_GATES:
+            raise ValueError(f"에뮬레이터가 지원하지 않는 게이트: {name}")
+        params = [float(p) for p in inst.operation.params]
+        head = name + (f"({','.join(repr(p) for p in params)})" if params else "")
+        lines.append(f"{head} {','.join(f'q[{q}]' for q in qs)};")
+    if -1 in measure_map:
+        raise ValueError("측정되지 않는 고전 비트가 있습니다")
+    return "\n".join(lines) + "\n", measure_map, dict(emu.count_ops())
+
+
+def convert_emulator_counts(counts: dict, measure_map: list[int], rng) -> np.ndarray:
+    """에뮬레이터 counts(문자 i = 물리 큐비트 i) → shot bool 행렬(Qiskit 고전 비트 순서, 열 0 = c_{n-1}).
+
+    shot 순서는 정보가 없으므로 seed 고정 난수로 섞습니다(STEP 4는 순서와 무관하게 개수만 씁니다).
+    """
+    keys = list(counts)
+    phys = np.array([[c == "1" for c in k] for k in keys], dtype=bool)          # (고유, 물리 큐비트)
+    n_clbits = len(measure_map)
+    clbits = phys[:, measure_map]                                                 # 열 c = 고전 비트 c
+    rows = clbits[:, ::-1]                                                        # Qiskit 문자열: 왼쪽 = c_{n-1}
+    reps = np.array([int(counts[k]) for k in keys])
+    shots = np.repeat(rows, reps, axis=0)
+    assert shots.shape[1] == n_clbits
+    return shots[rng.permutation(len(shots))]
+
+
+# ---- STEP 1~4 ----
 
 def step1_map(*, n_atoms: int = 14, spacing: float = 1.5, basis: str = "sto-6g", n_reps: int = 2,
               compute_fci: bool = True, compilation_seed: int = 12345) -> MappedProblem:
